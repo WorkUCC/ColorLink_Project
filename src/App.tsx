@@ -11,6 +11,7 @@ import { TechnicalSolution } from "./components/TechnicalSolution";
 import { SupplyAvailability } from "./components/SupplyAvailability";
 import { ServiceTracking } from "./components/ServiceTracking";
 import { QualityWarranty } from "./components/QualityWarranty";
+import { WhatsAppButton } from "./components/WhatsAppButton";
 import {
   UserProfile,
   ProjectNeedState,
@@ -335,6 +336,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Support Button */}
+      <WhatsAppButton />
     </div>
   );
 }
