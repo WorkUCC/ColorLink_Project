@@ -1,0 +1,6 @@
+{
+  "name": "ColorLink by Pintuco",
+  "description": "Ecosistema digital integrado de diagnóstico técnico, abastecimiento inteligente, servicio certificado y garantía de pinturas Pintuco.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
