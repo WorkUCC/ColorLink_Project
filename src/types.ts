@@ -110,6 +110,7 @@ export interface CertifiedPainter {
   reviewsCount: number;
   completedJobs: number;
   photo: string;
+  portfolioPhotos?: string[];
   experienceYears: number;
   badges: string[];
   availableSlot: string;

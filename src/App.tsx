@@ -22,10 +22,11 @@ import {
 import { PINTUCO_PALETTES, DEMO_PRESETS, CERTIFIED_PAINTERS } from "./data/pintucoData";
 
 export default function App() {
-  // Step navigation: 1: Login, 2: Need Wizard, 3: Technical Solution, 4: Supply, 5: Service/Tracking, 6: Quality/Warranty
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  // Step navigation: 1: Login/Account, 2: Need Wizard, 3: Technical Solution, 4: Supply, 5: Service/Tracking, 6: Quality/Warranty
+  // Default to step 2 so new visitors can explore freely without mandatory login
+  const [currentStep, setCurrentStep] = useState<number>(2);
 
-  // Authenticated user state
+  // Authenticated user state (null for visitors)
   const [user, setUser] = useState<UserProfile | null>(null);
 
   // Project need state gathered through wizard
@@ -147,15 +148,15 @@ export default function App() {
     }
   };
 
-  // Handler for user login
+  // Handler for user login - preserves progress and current step if logged in mid-flow
   const handleLoginSuccess = (profile: UserProfile) => {
     setUser(profile);
     setProjectNeed((prev) => ({
       ...prev,
-      city: profile.city || prev.city,
-      address: profile.address || prev.address,
+      city: prev.city || profile.city,
+      address: prev.address || profile.address,
     }));
-    setCurrentStep(2);
+    setCurrentStep((prevStep) => (prevStep === 1 ? 2 : prevStep));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -238,6 +239,13 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Ensure recommendation exists if user directly navigates to steps 3-6
+  useEffect(() => {
+    if (currentStep >= 3 && !recommendation && !isDiagnosing) {
+      fetchTechnicalDiagnosis(projectNeed);
+    }
+  }, [currentStep, recommendation, isDiagnosing, projectNeed]);
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-[#00A896] selection:text-white">
       {/* Global Brand Header */}
@@ -250,7 +258,7 @@ export default function App() {
         user={user}
         onLogout={() => {
           setUser(null);
-          setCurrentStep(1);
+          setCurrentStep(2);
         }}
         onLoadPreset={handleLoadPreset}
         projectNeed={projectNeed}
@@ -258,9 +266,15 @@ export default function App() {
 
       {/* Main Flow Views */}
       <main className="flex-1">
-        {/* STEP 1: Login / Registration */}
+        {/* STEP 1: Login / Registration (Optional for visitors, available for registered customers) */}
         {currentStep === 1 && (
-          <LoginScreen onLoginSuccess={handleLoginSuccess} />
+          <LoginScreen
+            onLoginSuccess={handleLoginSuccess}
+            onContinueAsGuest={() => {
+              setCurrentStep(2);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
         )}
 
         {/* STEP 2: Client Need Onboarding Wizard */}
@@ -278,10 +292,15 @@ export default function App() {
           <TechnicalSolution
             recommendation={recommendation}
             projectNeed={projectNeed}
+            user={user}
             isLoading={isDiagnosing}
             onProceedToSupply={handleProceedToSupply}
             onBackToWizard={() => setCurrentStep(2)}
             onRefineWithAI={handleRefineWithAI}
+            onLoginClick={() => {
+              setCurrentStep(1);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         )}
 

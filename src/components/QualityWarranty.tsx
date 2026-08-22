@@ -15,6 +15,8 @@ import {
   FileCheck,
   Send,
   Heart,
+  Clock,
+  X,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import {
@@ -40,14 +42,11 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
   user,
   onResetApp,
 }) => {
-  const [feedback, setFeedback] = useState<SatisfactionFeedback>({
-    productRating: 5,
-    serviceRating: 5,
-    recommendToFriend: true,
-    comments: "Excelente acabado y la atención del maestro aplicador fue impecable.",
-    submitted: false,
-  });
-
+  const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const [claimModalOpen, setClaimModalOpen] = useState<boolean>(false);
+  const [claimSubmitted, setClaimSubmitted] = useState<boolean>(false);
+  const [claimReason, setClaimReason] = useState<string>("retoque_detalle");
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   // Trigger confetti effect on initial mount
@@ -64,12 +63,12 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
     }
   }, []);
 
-  const handleRatingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedback((prev) => ({ ...prev, submitted: true }));
+  const handleQuickRating = (rating: number) => {
+    setFeedbackRating(rating);
+    setFeedbackSubmitted(true);
     try {
       confetti({
-        particleCount: 50,
+        particleCount: 60,
         spread: 60,
         origin: { y: 0.7 },
       });
@@ -82,6 +81,11 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 4000);
     window.print();
+  };
+
+  const handleClaimSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setClaimSubmitted(true);
   };
 
   const policyNumber = `POL-PNT-2026-${orderState.orderId || "89421"}`;
@@ -210,16 +214,26 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons: Download PDF / Print */}
+          {/* Action Buttons: Download PDF / Print / Claim Warranty */}
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={handleDownloadCertificate}
-              className="flex-1 bg-[#002D62] hover:bg-[#003882] text-white font-bold py-3 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+              className="flex-1 bg-[#002D62] hover:bg-[#003882] text-white font-bold py-3 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
               id="btn-download-cert"
             >
               <Download className="w-4 h-4" />
               <span>Descargar Certificado Oficial</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setClaimModalOpen(true)}
+              className="px-4 py-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-2xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              id="btn-open-claim"
+            >
+              <ShieldCheck className="w-4 h-4 text-amber-700" />
+              <span>Pedir Retoque / Reclamar</span>
             </button>
 
             <button
@@ -234,11 +248,27 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
                   alert(`Póliza copiada al portapapeles: ${policyNumber}`);
                 }
               }}
-              className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs flex items-center gap-1.5 transition-colors"
+              className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Share2 className="w-4 h-4" />
               <span className="hidden sm:inline">Compartir</span>
             </button>
+          </div>
+
+          {/* Visual Warranty Expiration & Maintenance Reminder Card */}
+          <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-emerald-950 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-emerald-700" />
+                Vigencia de Cobertura Activa Pintuco 360
+              </span>
+              <span className="bg-emerald-200/80 text-emerald-900 font-extrabold px-2 py-0.5 rounded-full text-[10px]">
+                {recommendation.warrantyYears} Años
+              </span>
+            </div>
+            <p className="text-emerald-800 leading-relaxed text-[11px]">
+              Tu recubrimiento está cubierto ante ampollamiento, decoloración o desprendimiento hasta el <strong>{expirationDate}</strong>. Te enviaremos un recordatorio por email antes de vencer para agendar tu mantenimiento preventivo oficial.
+            </p>
           </div>
 
           {downloadSuccess && (
@@ -249,95 +279,68 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
           )}
         </div>
 
-        {/* Right Column: Satisfaction Feedback & ColorLink Unique Value Overview */}
+        {/* Right Column: 1-Click Satisfaction Feedback & Value Overview */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Satisfaction Survey Form */}
+          {/* Quick 1-Click Satisfaction Survey */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
+            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
               <Heart className="w-4 h-4 text-rose-500" />
-              Encuesta de Satisfacción Rápida
+              Calificación en 1 Clic
             </h3>
+            <p className="text-xs text-slate-500 mb-4">
+              ¿Cómo calificarías tu experiencia general con ColorLink y el maestro certificado?
+            </p>
 
-            {!feedback.submitted ? (
-              <form onSubmit={handleRatingSubmit} className="space-y-4 text-xs">
-                {/* Product Rating */}
-                <div>
-                  <label className="block text-slate-700 font-medium mb-1">
-                    Calidad y cobertura del producto ({recommendation.productName})
-                  </label>
-                  <div className="flex gap-2">
+            {!feedbackSubmitted ? (
+              <div className="space-y-4">
+                {/* Expressive 1-Click Emoji buttons */}
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    { stars: 1, label: "Mala", emoji: "😞" },
+                    { stars: 2, label: "Regular", emoji: "😐" },
+                    { stars: 3, label: "Aceptable", emoji: "🙂" },
+                    { stars: 4, label: "Muy Buena", emoji: "😊" },
+                    { stars: 5, label: "Excelente", emoji: "🤩" },
+                  ].map((item) => (
+                    <button
+                      key={item.stars}
+                      type="button"
+                      onClick={() => handleQuickRating(item.stars)}
+                      className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-[#00A896] hover:bg-teal-50/50 transition-all group cursor-pointer"
+                    >
+                      <span className="text-2xl group-hover:scale-125 transition-transform">
+                        {item.emoji}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#002D62] mt-1 text-center">
+                        {item.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Or 5-star direct tap */}
+                <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-100">
+                  <span className="text-[11px] text-slate-500">O toca las estrellas:</span>
+                  <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
-                        onClick={() => setFeedback((f) => ({ ...f, productRating: star }))}
-                        className="p-1 text-amber-400 hover:scale-110 transition-transform"
+                        onClick={() => handleQuickRating(star)}
+                        className="p-1 text-amber-400 hover:scale-125 transition-transform cursor-pointer"
                       >
-                        <Star
-                          className={`w-6 h-6 ${
-                            star <= feedback.productRating
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-slate-300"
-                          }`}
-                        />
+                        <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {/* Service Rating */}
-                <div>
-                  <label className="block text-slate-700 font-medium mb-1">
-                    Puntualidad y limpieza del aplicador certificado
-                  </label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setFeedback((f) => ({ ...f, serviceRating: star }))}
-                        className="p-1 text-amber-400 hover:scale-110 transition-transform"
-                      >
-                        <Star
-                          className={`w-6 h-6 ${
-                            star <= feedback.serviceRating
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-slate-300"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Comments */}
-                <div>
-                  <label className="block text-slate-700 font-medium mb-1">
-                    Comentario u opinión
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={feedback.comments}
-                    onChange={(e) => setFeedback((f) => ({ ...f, comments: e.target.value }))}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[#00A896] hover:bg-[#009282] text-white font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
-                  id="btn-submit-feedback"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Enviar Calificación</span>
-                </button>
-              </form>
+              </div>
             ) : (
-              <div className="p-4 bg-emerald-50 text-emerald-900 rounded-2xl text-center space-y-1">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 mx-auto" />
-                <h4 className="font-bold text-xs">¡Gracias por tu opinión!</h4>
+              <div className="p-4 bg-emerald-50 text-emerald-900 rounded-2xl text-center space-y-1.5 animate-in fade-in">
+                <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
+                <h4 className="font-bold text-xs">¡Calificación de {feedbackRating}/5 estrellas guardada!</h4>
                 <p className="text-[11px] text-emerald-700">
-                  Tu valoración ayuda a mantener el alto estándar de la red de aplicadores certificados Pintuco.
+                  Gracias por ayudarnos a certificar la excelencia del servicio Pintuco ColorLink.
                 </p>
               </div>
             )}
@@ -376,7 +379,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             <button
               type="button"
               onClick={onResetApp}
-              className="w-full mt-3 bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 rounded-xl border border-white/20 text-xs transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-3 bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 rounded-xl border border-white/20 text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               id="btn-new-project"
             >
               <RotateCcw className="w-3.5 h-3.5 text-[#00E5C9]" />
@@ -385,6 +388,109 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Claim Warranty / Request Touch-up Modal */}
+      {claimModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Solicitar Retoque o Garantía</h3>
+                  <span className="text-[11px] text-slate-500 font-mono">Póliza: {policyNumber}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setClaimModalOpen(false);
+                  setClaimSubmitted(false);
+                }}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!claimSubmitted ? (
+              <form onSubmit={handleClaimSubmit} className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-800 mb-1">
+                    Motivo de la solicitud:
+                  </label>
+                  <select
+                    value={claimReason}
+                    onChange={(e) => setClaimReason(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800"
+                  >
+                    <option value="retoque_detalle">Retoque de detalle estético o esquinero</option>
+                    <option value="desprendimiento">Desprendimiento o ampollamiento de película</option>
+                    <option value="tono_variacion">Variación visual de tono o acabado</option>
+                    <option value="revision_tecnica">Visita de inspección técnica preventiva</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-800 mb-1">
+                    Detalle o zona afectada:
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Ejemplo: Se requiere un pequeño retoque en la pared lateral cerca al marco de la puerta..."
+                    defaultValue="Retoque preventivo cubierto por garantía Pintuco 360."
+                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white"
+                  />
+                </div>
+
+                <div className="p-3 bg-blue-50 rounded-xl text-blue-900 text-[11px] flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#002D62] shrink-0" />
+                  <span>Un asesor técnico Pintuco se comunicará a tu teléfono registrado en menos de <strong>2 horas hábiles</strong>.</span>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setClaimModalOpen(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 rounded-xl bg-[#002D62] hover:bg-[#003882] text-white font-bold transition-all shadow-md"
+                  >
+                    Enviar Solicitud
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <h4 className="font-bold text-base text-slate-900">¡Solicitud de Retoque Radicada con Éxito!</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Radicado Nº <strong>RTQ-2026-0842</strong>. Hemos asignado la revisión al maestro certificado <strong>{orderState.selectedPainter?.name || "Pintuco"}</strong> con cobertura de garantía total sin costo.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClaimModalOpen(false);
+                    setClaimSubmitted(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#00A896] text-white font-bold text-xs shadow-md"
+                >
+                  Entendido
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

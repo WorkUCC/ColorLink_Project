@@ -14,28 +14,38 @@ import {
   RotateCcw,
   Send,
   Loader2,
+  AlertCircle,
+  Tag,
+  Check,
 } from "lucide-react";
-import { TechnicalRecommendation, ProjectNeedState } from "../types";
+import { TechnicalRecommendation, ProjectNeedState, UserProfile } from "../types";
 
 interface TechnicalSolutionProps {
   recommendation: TechnicalRecommendation | null;
   projectNeed: ProjectNeedState;
+  user?: UserProfile | null;
   isLoading: boolean;
   onProceedToSupply: () => void;
   onBackToWizard: () => void;
   onRefineWithAI: (userQuestion: string) => void;
+  onLoginClick?: () => void;
 }
 
 export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
   recommendation,
   projectNeed,
+  user,
   isLoading,
   onProceedToSupply,
   onBackToWizard,
   onRefineWithAI,
+  onLoginClick,
 }) => {
   const [userQuery, setUserQuery] = useState("");
   const [isAsking, setIsAsking] = useState(false);
+  const [selectedCoats, setSelectedCoats] = useState<number>(
+    recommendation?.calculation?.coatCount || 2
+  );
 
   const handleAskQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +97,91 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
     );
   }
 
+  // Dynamic live recalculations based on coat count
+  const area = projectNeed.areaM2 || recommendation.calculation.areaM2;
+  // standard 22 m2/gal at 2 coats -> 44 m2/gal at 1 coat
+  const totalGallonsRaw = (area / 44) * selectedCoats;
+  const totalGallons = Math.max(1, Math.ceil(totalGallonsRaw));
+  const litersEstimate = Math.round(totalGallons * 3.785);
+
+  const buckets5Gal = Math.floor(totalGallons / 5);
+  const singleGallons = totalGallons % 5;
+  let dynamicFormat = "";
+  if (buckets5Gal > 0 && singleGallons > 0) {
+    dynamicFormat = `${buckets5Gal} Cuñete${buckets5Gal > 1 ? "s" : ""} (5 gal) + ${singleGallons} Galón${singleGallons > 1 ? "es" : ""}`;
+  } else if (buckets5Gal > 0) {
+    dynamicFormat = `${buckets5Gal} Cuñete${buckets5Gal > 1 ? "s" : ""} (5 gal)`;
+  } else {
+    dynamicFormat = `${singleGallons} Galón${singleGallons > 1 ? "es" : ""}`;
+  }
+
+  // Cost ratio according to coats
+  const coatMultiplier = selectedCoats === 1 ? 0.58 : selectedCoats === 3 ? 1.45 : 1;
+  const productBasePrice = Math.round(recommendation.pricing.productEstimatedTotal * coatMultiplier);
+  const laborMultiplier = selectedCoats === 1 ? 0.65 : selectedCoats === 3 ? 1.35 : 1;
+  const dynamicLaborPrice = Math.round(recommendation.pricing.laborEstimatedTotal * laborMultiplier);
+
+  // Calculate member discounts
+  const memberDiscountRate = 0.15; // 15% discount for registered customers
+  const memberDiscountAmount = Math.round(productBasePrice * memberDiscountRate);
+  const finalProductPrice = user ? productBasePrice - memberDiscountAmount : productBasePrice;
+  const finalTotalPrice = finalProductPrice + dynamicLaborPrice;
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+      {/* Top Incentive or VIP Confirmation Banner */}
+      {!user ? (
+        <div className="mb-6 bg-gradient-to-r from-amber-50/80 via-emerald-50/40 to-slate-50 border border-amber-200 rounded-2xl p-4 sm:p-4.5 flex items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold shrink-0">
+              <Sparkles className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded-md">
+                  Club Pintuco
+                </span>
+                <span className="text-xs font-semibold text-slate-700">
+                  Ahorro potencial de ${memberDiscountAmount.toLocaleString("es-CO")} COP (-15%) para cuentas registradas
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Los clientes registrados obtienen fórmulas archivadas, tarifas preferenciales y póliza de garantía digital.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-300/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#00A896] text-white flex items-center justify-center font-bold shrink-0 shadow-md">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full">
+                  ✨ Tarifa Preferencial Club Pintuco Activa
+                </span>
+                <span className="text-xs font-bold text-emerald-800">
+                  Descuento del 15% aplicado (-${memberDiscountAmount.toLocaleString("es-CO")} COP)
+                </span>
+              </div>
+              <p className="text-sm font-bold text-slate-900 mt-1">
+                Cotización técnica personalizada para {user.name} ({user.type === "hogar" ? "Hogar" : user.type === "contratista" ? "Contratista" : "Empresa"})
+              </p>
+              <p className="text-xs text-slate-600">
+                Fórmula archivada en tu cuenta • Despacho prioritario en {user.city} • Póliza Pintuco 360 garantizada.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 bg-white/80 px-3.5 py-2 rounded-xl border border-emerald-200 shadow-2xs shrink-0">
+            <Check className="w-4 h-4 text-emerald-600" />
+            <span>Beneficio VIP de Cliente Aplicado</span>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
@@ -239,52 +332,152 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
               </span>
             </div>
 
+            {/* Coat Selector & Recalculation */}
             <div className="py-4 space-y-4">
               <div>
-                <span className="text-xs text-slate-500 block">Formato Recomendado</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Número de Manos a Aplicar
+                  </label>
+                  <span className="text-[11px] font-bold text-[#00A896]">
+                    {selectedCoats === 2 ? "★ Recomendado" : selectedCoats === 1 ? "Retoque leve" : "Alta cobertura"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCoats(1)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      selectedCoats === 1
+                        ? "bg-[#002D62] text-white border-[#002D62] shadow-sm"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    1 Mano
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCoats(2)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer relative ${
+                      selectedCoats === 2
+                        ? "bg-[#002D62] text-white border-[#002D62] shadow-sm"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    2 Manos
+                    <span className="absolute -top-1.5 -right-1 bg-emerald-500 text-white text-[9px] px-1 py-0.2 rounded-full">
+                      Pintuco
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCoats(3)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      selectedCoats === 3
+                        ? "bg-[#002D62] text-white border-[#002D62] shadow-sm"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    3 Manos
+                  </button>
+                </div>
+              </div>
+
+              {/* Visual explanation of 1 vs 2 coats */}
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                  <Info className="w-3.5 h-3.5 text-[#00A896]" />
+                  <span>Criterio técnico de aplicación:</span>
+                </div>
+                {selectedCoats === 1 ? (
+                  <p className="text-slate-600">
+                    <strong>1 Mano:</strong> Válido solo para retoque sobre pintura previa del mismo color exacto y sin manchas profundas.
+                  </p>
+                ) : selectedCoats === 2 ? (
+                  <p className="text-slate-600">
+                    <strong>2 Manos (Estándar de Fábrica):</strong> Sella porosidad, asegura poder cubriente parejo y activa la <strong>Garantía Oficial Pintuco 360</strong>.
+                  </p>
+                ) : (
+                  <p className="text-slate-600">
+                    <strong>3 Manos:</strong> Recomendado para cambios drásticos (de oscuro a claro) o fachadas con alta exposición solar y salitre.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <span className="text-xs text-slate-500 block">Formato Calculado en Vivo</span>
                 <span className="text-lg font-black text-[#002D62] block mt-0.5">
-                  {recommendation.calculation.recommendedFormat}
+                  {dynamicFormat}
                 </span>
                 <span className="text-xs text-slate-500 font-medium">
-                  Equivalente a ~{recommendation.calculation.totalGallons} Galones ({recommendation.calculation.litersEstimate} Litros aprox.)
+                  Equivalente a ~{totalGallons} Galón{totalGallons > 1 ? "es" : ""} (~{litersEstimate} Litros para {area} m²)
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <div>
                   <span className="text-slate-500 block">Área base</span>
-                  <span className="font-bold text-slate-800">{recommendation.calculation.areaM2} m²</span>
+                  <span className="font-bold text-slate-800">{area} m²</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Manos de acabado</span>
-                  <span className="font-bold text-slate-800">2 Manos</span>
+                  <span className="text-slate-500 block">Manos seleccionadas</span>
+                  <span className="font-bold text-[#00A896]">{selectedCoats} Mano{selectedCoats > 1 ? "s" : ""}</span>
                 </div>
                 <div className="col-span-2 pt-1 border-t border-slate-200">
-                  <span className="text-slate-500 block">Rendimiento garantizado</span>
+                  <span className="text-slate-500 block">Rendimiento estimado</span>
                   <span className="font-semibold text-slate-700">{recommendation.calculation.coverageRate}</span>
                 </div>
+              </div>
+
+              {/* Estimation Disclaimer */}
+              <div className="p-2.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-[11px] text-amber-900 flex items-start gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Aviso:</strong> Este cálculo es una estimación y puede variar según la absorción, rugosidad y el estado real de la superficie.
+                </span>
               </div>
             </div>
 
             {/* Estimated Pricing Breakdown */}
             <div className="pt-4 border-t border-slate-100 space-y-2.5">
+              {/* Product Price */}
               <div className="flex items-center justify-between text-xs text-slate-600">
-                <span>Pintura Pintuco + Tinturado:</span>
-                <span className="font-semibold text-slate-900">
-                  ${recommendation.pricing.productEstimatedTotal.toLocaleString("es-CO")} COP
-                </span>
+                <span>Pintura Pintuco ({dynamicFormat}):</span>
+                <div className="text-right">
+                  {user && (
+                    <span className="line-through text-slate-400 text-[11px] block">
+                      ${productBasePrice.toLocaleString("es-CO")} COP
+                    </span>
+                  )}
+                  <span className="font-semibold text-slate-900">
+                    ${finalProductPrice.toLocaleString("es-CO")} COP
+                  </span>
+                </div>
               </div>
 
+              {/* Member Savings Row if User is logged in */}
+              {user && (
+                <div className="flex items-center justify-between text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg font-semibold border border-emerald-100">
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Descuento Cliente (-15%):</span>
+                  </span>
+                  <span>-${memberDiscountAmount.toLocaleString("es-CO")} COP</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-xs text-slate-600">
-                <span>Mano de obra sugerida ({projectNeed.areaM2} m²):</span>
+                <span>Mano de obra certificada ({selectedCoats} manos):</span>
                 <span className="font-semibold text-slate-900">
-                  ${recommendation.pricing.laborEstimatedTotal.toLocaleString("es-CO")} COP
+                  ${dynamicLaborPrice.toLocaleString("es-CO")} COP
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-xs text-slate-600">
                 <span>Envío express a domicilio:</span>
-                <span className="font-bold text-emerald-700">GRATIS por ColorLink</span>
+                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  $0 COP (Gratis)
+                </span>
               </div>
 
               <div className="pt-3 border-t border-slate-200 flex items-baseline justify-between">
@@ -294,9 +487,11 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                   </span>
                   <span className="text-[10px] text-slate-500">Materiales + Servicio Certificado</span>
                 </div>
-                <span className="text-xl font-black text-[#002D62]">
-                  ${recommendation.pricing.totalEstimated.toLocaleString("es-CO")}
-                </span>
+                <div className="text-right">
+                  <span className="text-xl font-black text-[#002D62]">
+                    ${finalTotalPrice.toLocaleString("es-CO")}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -304,7 +499,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             <button
               type="button"
               onClick={onProceedToSupply}
-              className="w-full mt-6 bg-[#00A896] hover:bg-[#009282] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-[#00A896]/20 transition-all flex items-center justify-center gap-2 group"
+              className="w-full mt-6 bg-[#00A896] hover:bg-[#009282] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-[#00A896]/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
               id="btn-proceed-supply"
             >
               <span>Verificar Disponibilidad & Entrega</span>

@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLoadPreset,
 }) => {
   const steps = [
-    { num: 1, label: "Acceso", icon: User },
+    { num: 1, label: "Acceso / Clientes", icon: User },
     { num: 2, label: "Diagnóstico", icon: Layers },
     { num: 3, label: "Solución IA", icon: Sparkles },
     { num: 4, label: "Disponibilidad", icon: Truck },
@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={idx}
                 onClick={() => onLoadPreset(preset)}
-                className="text-[11px] bg-blue-900/80 hover:bg-[#00A896] hover:text-white text-blue-100 px-2 py-0.5 rounded transition-colors border border-blue-800"
+                className="text-[11px] bg-blue-900/80 hover:bg-[#00A896] hover:text-white text-blue-100 px-2 py-0.5 rounded transition-colors border border-blue-800 cursor-pointer"
                 title={preset.subtitle}
               >
                 {idx === 0 ? "Fachada Bogotá" : idx === 1 ? "Interior Medellín" : "Piso Cali"}
@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
         {/* Brand */}
         <div
-          onClick={() => onNavigateStep(1)}
+          onClick={() => onNavigateStep(2)}
           className="flex items-center gap-3 cursor-pointer group"
           id="btn-brand-home"
         >
@@ -103,6 +103,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* User status & role pill */}
         {user ? (
           <div className="flex items-center gap-3">
+            {/* VIP Member Discount Pill */}
+            <div className="hidden lg:flex items-center gap-1.5 bg-amber-400/20 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full border border-amber-400/30">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Cliente VIP: 15% DCTO Activo</span>
+            </div>
+
             <div className="hidden sm:flex flex-col text-right">
               <span className="text-sm font-semibold text-white leading-tight">
                 {user.name}
@@ -117,21 +123,28 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <button
               onClick={onLogout}
-              className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg font-medium transition-colors border border-white/10"
+              className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg font-medium transition-colors border border-white/10 cursor-pointer"
               id="btn-logout"
             >
               Cerrar sesión
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-blue-200 hidden sm:inline">¿Tienes un proyecto?</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Free guest badge */}
+            <div className="hidden md:flex items-center gap-1.5 bg-emerald-500/20 text-[#00E5C9] text-xs font-medium px-3 py-1.5 rounded-full border border-emerald-400/30">
+              <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" />
+              <span>Modo Visitante</span>
+            </div>
+
+            {/* Single clean Iniciar Sesión button */}
             <button
               onClick={() => onNavigateStep(1)}
-              className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+              className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-bold px-3.5 py-2 rounded-lg border border-emerald-400/40 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               id="btn-login-header"
             >
-              <User className="w-3.5 h-3.5" /> Iniciar Sesión
+              <User className="w-3.5 h-3.5 text-white" />
+              <span>Iniciar Sesión</span>
             </button>
           </div>
         )}
@@ -149,13 +162,12 @@ export const Header: React.FC<HeaderProps> = ({
               <React.Fragment key={step.num}>
                 <button
                   onClick={() => onNavigateStep(step.num)}
-                  disabled={!user && step.num > 1}
-                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? "bg-[#00A896] text-white shadow-md shadow-[#00A896]/30 font-semibold"
                       : isPassed
                       ? "text-blue-100 hover:bg-white/10 hover:text-white"
-                      : "text-blue-300/60 cursor-not-allowed"
+                      : "text-blue-200 hover:bg-white/10 hover:text-white"
                   }`}
                   id={`step-nav-${step.num}`}
                 >
@@ -165,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
                         ? "bg-white text-[#002D62]"
                         : isPassed
                         ? "bg-[#00E5C9]/20 text-[#00E5C9]"
-                        : "bg-blue-900 text-blue-300"
+                        : "bg-blue-900 text-blue-200"
                     }`}
                   >
                     {isPassed ? <CheckCircle2 className="w-3.5 h-3.5" /> : step.num}

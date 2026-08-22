@@ -31,14 +31,37 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
   onBackToTechnical,
 }) => {
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("domicilio_express");
-  const [selectedStoreId, setSelectedStoreId] = useState<string>(PINTUCO_STORES[0]?.id || "st-bog-01");
 
-  // Filter stores by current city if available, otherwise show all
+  // Filter stores by current city if available, otherwise show all, and sort by proximity (distance ascending)
   const filteredStores = PINTUCO_STORES.filter(
     (s) => s.city.toLowerCase().includes(projectNeed.city.split(" ")[0].toLowerCase())
   );
-  const displayStores = filteredStores.length > 0 ? filteredStores : PINTUCO_STORES;
+  const baseStores = filteredStores.length > 0 ? filteredStores : PINTUCO_STORES;
+  
+  // Sort numerically by distance (e.g. "1.2 km" -> 1.2)
+  const displayStores = [...baseStores].sort((a, b) => {
+    const distA = parseFloat(a.distance.replace(/[^\d.]/g, "")) || 999;
+    const distB = parseFloat(b.distance.replace(/[^\d.]/g, "")) || 999;
+    return distA - distB;
+  });
+
+  const [selectedStoreId, setSelectedStoreId] = useState<string>(displayStores[0]?.id || "st-bog-01");
   const selectedStore = displayStores.find((s) => s.id === selectedStoreId) || displayStores[0];
+
+  // Concrete date calculation for production / tinting
+  const getEstimatedDateString = () => {
+    const targetDate = new Date();
+    // Add 1 day if urgent, or 2 days for custom tinting & dispatch
+    const daysToAdd = projectNeed.urgency === "urgente_24h" ? 1 : 2;
+    targetDate.setDate(targetDate.getDate() + daysToAdd);
+    return targetDate.toLocaleDateString("es-CO", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+  const concreteEstimatedDate = getEstimatedDateString();
 
   const handleContinue = () => {
     if (deliveryMethod === "retiro_tienda" && selectedStore) {
@@ -78,14 +101,14 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                🟢 Semáforo de Stock: Disponible Inmediato
+                🟢 Semáforo de Stock: Tinturado Activo
               </span>
             </div>
             <h3 className="text-base font-bold text-emerald-950 mt-0.5">
               Material listo para tinturado de fábrica ({projectNeed.selectedColor.name})
             </h3>
             <p className="text-xs text-emerald-800">
-              {recommendation.calculation.recommendedFormat} de {recommendation.productName} garantizados.
+              {recommendation.calculation.recommendedFormat} de {recommendation.productName} • Disponible para despacho a partir del <strong>{concreteEstimatedDate}</strong>.
             </p>
           </div>
         </div>
@@ -217,8 +240,9 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
           </div>
 
           <div className="space-y-2.5">
-            {displayStores.map((st) => {
+            {displayStores.map((st, index) => {
               const isSelected = selectedStoreId === st.id;
+              const isClosest = index === 0;
               return (
                 <div
                   key={st.id}
@@ -234,7 +258,14 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
                       <Store className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900">{st.name}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900">{st.name}</h4>
+                        {isClosest && (
+                          <span className="text-[10px] font-bold bg-[#00A896] text-white px-2 py-0.2 rounded-full">
+                            ★ Más cercana
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-slate-500">{st.address} • {st.openingHours}</p>
                     </div>
                   </div>
@@ -243,7 +274,7 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full block">
                       En Stock
                     </span>
-                    <span className="text-[10px] text-slate-500 mt-0.5 block">{st.distance}</span>
+                    <span className="text-[11px] font-bold text-slate-700 mt-0.5 block">{st.distance}</span>
                   </div>
                 </div>
               );
@@ -251,6 +282,32 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
           </div>
         </div>
       )}
+
+      {/* Logistics & Cost Transparency Card */}
+      <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#002D62] text-white flex items-center justify-center shrink-0">
+            <Truck className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 block">
+              Resumen Logístico: {deliveryMethod === "domicilio_express" ? "Despacho Express a Domicilio" : `Retiro en Tienda (${selectedStore?.name})`}
+            </span>
+            <span className="text-slate-500 text-[11px]">
+              {deliveryMethod === "domicilio_express"
+                ? `Entrega en ${projectNeed.address || user?.address || projectNeed.city}`
+                : `Dirección de retiro: ${selectedStore?.address}`}
+            </span>
+          </div>
+        </div>
+
+        <div className="text-right shrink-0">
+          <span className="text-slate-500 block text-[11px]">Costo de flete logístico:</span>
+          <span className="text-sm font-black text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-lg inline-block">
+            $0 COP (100% Bonificado)
+          </span>
+        </div>
+      </div>
 
       {/* Footer Navigation */}
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-200">

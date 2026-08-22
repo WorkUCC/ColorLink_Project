@@ -116,6 +116,32 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
     <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
       {/* Wizard Header with dynamic progress */}
       <div className="mb-8">
+        {!user ? (
+          <div className="mb-4 bg-emerald-50 border border-emerald-200/80 rounded-xl p-3 sm:p-3.5 flex items-center justify-between text-xs text-slate-800 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+              <span>
+                <strong className="text-emerald-900 font-bold">Modo Visitante Libre:</strong> Podrás cotizar, simular color y calcular gratis; el registro solo se pide al agendar tu instalación o despacho oficial.
+              </span>
+            </div>
+            <span className="hidden sm:inline-block bg-white text-emerald-800 font-bold text-[10px] uppercase px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+              Sin registro previo
+            </span>
+          </div>
+        ) : (
+          <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between text-xs text-emerald-950 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
+              <span>
+                <strong className="text-emerald-900 font-bold">Cliente {user.name}:</strong> 15% Descuento Especial Activo • Opciones técnicas personalizadas para {user.city}.
+              </span>
+            </div>
+            <span className="bg-emerald-600 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
+              Beneficios VIP
+            </span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-3">
           <div>
             <span className="text-xs font-bold tracking-wider uppercase text-[#00A896]">
@@ -413,11 +439,44 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                 </span>
               </div>
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                <span className="text-[11px] text-slate-500 font-medium block">Manos de aplicación</span>
+                <span className="text-[11px] text-slate-500 font-medium block">Manos recomendadas</span>
                 <span className="text-lg font-bold text-emerald-700">
                   2 Manos Cruzadas
                 </span>
               </div>
+            </div>
+
+            {/* Visual Guide: 1 Mano vs 2 Manos */}
+            <div className="bg-amber-50/70 rounded-2xl p-4 border border-amber-200/80 space-y-2.5">
+              <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
+                <Info className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>¿Por qué recomendamos 2 manos en el 90% de los proyectos?</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="bg-white/80 p-3 rounded-xl border border-amber-200">
+                  <span className="font-bold text-slate-900 block mb-0.5">1 Mano (Solo Retoque):</span>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Aplica únicamente si vas a repintar con el <strong>mismo tono exacto</strong> sobre una base limpia y en perfecto estado.
+                  </p>
+                </div>
+                <div className="bg-white/80 p-3 rounded-xl border border-amber-300 ring-1 ring-amber-400/30">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="font-bold text-[#002D62] block">2 Manos (Estándar Pintuco):</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Garantía 100%</span>
+                  </div>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Sella la porosidad, evita sombras o vetas, garantiza la viveza del color y activa la póliza de respaldo de fábrica.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Technical Disclaimer Notice */}
+            <div className="p-3 bg-slate-100/90 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+              <span>
+                <strong>Nota técnica:</strong> Este cálculo es una estimación técnica y puede variar según la rugosidad, porosidad, absorción y el estado real de la superficie a pintar.
+              </span>
             </div>
           </div>
         )}
@@ -614,13 +673,13 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Dirección o Barrio
+                  Dirección o Barrio (Opcional)
                 </label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Ej: Carrera 7 # 116-50"
+                  placeholder="Ej: Carrera 7 # 116-50 o sector general"
                   className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white"
                   id="input-address"
                 />
@@ -703,17 +762,17 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
         <button
           type="button"
           onClick={handlePrev}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-colors cursor-pointer"
           id="btn-wizard-prev"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{wizardStep === 1 ? "Volver a Perfil" : "Anterior"}</span>
+          <span>{wizardStep === 1 ? (user ? "Volver a Perfil" : "Acceso Clientes (Opcional)") : "Anterior"}</span>
         </button>
 
         <button
           type="button"
           onClick={handleNext}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#002D62] hover:bg-[#003882] text-white font-bold text-sm shadow-md transition-all group"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#002D62] hover:bg-[#003882] text-white font-bold text-sm shadow-md transition-all group cursor-pointer"
           id="btn-wizard-next"
         >
           <span>
