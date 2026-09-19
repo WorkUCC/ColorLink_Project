@@ -20,6 +20,15 @@ import {
   DeliveryMethod,
 } from "./types";
 import { PINTUCO_PALETTES, DEMO_PRESETS, CERTIFIED_PAINTERS } from "./data/pintucoData";
+// --- Integración Supabase ---
+import { SupabaseTestPanel } from "./components/SupabaseTestPanel";
+import {
+  persistirFlujoDiagnostico,
+  guardarPedido,
+  guardarServicio,
+  guardarGarantia,
+} from "./lib/colorlinkApi";
+import { supabaseConfigurado } from "./lib/supabaseClient";
 
 export default function App() {
   // Step navigation: 1: Login/Account, 2: Need Wizard, 3: Technical Solution, 4: Supply, 5: Service/Tracking, 6: Quality/Warranty
@@ -40,6 +49,19 @@ export default function App() {
     urgency: "urgente_24h",
     projectNotes: "Filtraciones leves en la pared lateral por lluvias recientes.",
   });
+
+  // IDs devueltos por Supabase tras persistir el flujo
+  const [dbIds, setDbIds] = useState<{
+    idUsuario: number | null;
+    idProyecto: number | null;
+    idRecomendacion: number | null;
+    idPedido: number | null;
+  }>({ idUsuario: null, idProyecto: null, idRecomendacion: null, idPedido: null });
+
+  // Panel de pruebas de integración: se activa con ?pruebas=1 en la URL
+  const mostrarPanelPruebas =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("pruebas") === "1";
 
   // AI & technical recommendation state
   const [recommendation, setRecommendation] = useState<TechnicalRecommendation | null>(null);
@@ -62,7 +84,10 @@ export default function App() {
   });
 
   // Function to call the backend technical AI diagnostic engine
-  const fetchTechnicalDiagnosis = async (needData: ProjectNeedState, additionalNotes?: string) => {
+  const fetchTechnicalDiagnosis = async (
+    needData: ProjectNeedState,
+    additionalNotes?: string
+  ): Promise<TechnicalRecommendation | null> => {
     setIsDiagnosing(true);
     try {
       /*
@@ -90,14 +115,16 @@ export default function App() {
         const data = await response.json();
         if (data.success && data.recommendation) {
           setRecommendation(data.recommendation);
+          return data.recommendation as TechnicalRecommendation;
         }
+        return null;
       } else {
         throw new Error("Failed backend diagnosis response");
       }
     } catch (err) {
       console.warn("Backend diagnosis fallback:", err);
       // Robust client fallback
-      setRecommendation({
+      const fallback: TechnicalRecommendation = {
         productName: "Pintuco Koraza® Doble Vida",
         productCategory: "Pintura Acrílica de Alta Resistencia Exterior",
         warrantyYears: 7,
@@ -142,7 +169,9 @@ export default function App() {
           nearestStore: `Pintacasa Pintuco ${needData.city.split(" ")[0]}`,
           stockLevel: "Alto (Stock Verificado)",
         },
-      });
+      };
+      setRecommendation(fallback);
+      return fallback;
     } finally {
       setIsDiagnosing(false);
     }
@@ -165,7 +194,23 @@ export default function App() {
     setProjectNeed(needData);
     setCurrentStep(3);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    await fetchTechnicalDiagnosis(needData);
+
+    const rec = await fetchTechnicalDiagnosis(needData);
+
+    /*
+     * INSERT real en Supabase: usuario -> proyecto -> recomendacion.
+     * Si la base de datos falla, la app sigue funcionando en modo demo:
+     * la persistencia no debe bloquear la experiencia del usuario.
+     */
+    if (supabaseConfigurado) {
+      try {
+        const ids = await persistirFlujoDiagnostico(user, needData, rec);
+        setDbIds((prev) => ({ ...prev, ...ids }));
+        console.info("[Supabase] Proyecto guardado:", ids);
+      } catch (err) {
+        console.error("[Supabase] Error al guardar el proyecto:", err);
+      }
+    }
   };
 
   // Handler for refining recommendation with questions
@@ -200,14 +245,45 @@ export default function App() {
   };
 
   // Handler to proceed to Quality and Warranty
-  const handleProceedToQuality = () => {
-    setOrderState((prev) => ({
-      ...prev,
+  const handleProceedToQuality = async () => {
+    const ordenFinal: OrderState = {
+      ...orderState,
       trackingStep: "completado",
       currentStepIndex: 4,
-    }));
+    };
+    setOrderState(ordenFinal);
     setCurrentStep(6);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // INSERT de pedido -> servicio -> garantía al cerrar el flujo
+    if (supabaseConfigurado && dbIds.idRecomendacion) {
+      try {
+        const idPedido = await guardarPedido(
+          ordenFinal,
+          dbIds.idUsuario,
+          dbIds.idRecomendacion,
+          null, // id_tienda: enlazar cuando el paso 4 use tiendas de la BD
+          recommendation?.pricing.totalEstimated ?? 0
+        );
+
+        await guardarServicio(
+          idPedido,
+          null, // id_maestro: enlazar cuando los maestros vengan de la BD
+          `${ordenFinal.scheduledDate}T08:00:00Z`,
+          ordenFinal.trackingStep
+        );
+
+        const garantia = await guardarGarantia(
+          idPedido,
+          recommendation?.warrantyYears ?? 5
+        );
+
+        setDbIds((prev) => ({ ...prev, idPedido }));
+        console.info("[Supabase] Pedido y garantía guardados:", idPedido, garantia.numero_poliza);
+      } catch (err) {
+        console.error("[Supabase] Error al guardar el pedido:", err);
+      }
+    }
   };
 
   // Handler to load demo presets for rapid evaluation
@@ -336,6 +412,10 @@ export default function App() {
             user={user}
             onResetApp={handleResetApp}
           />
+        )}
+        {/* PANEL DE PRUEBAS: abrir la app con ?pruebas=1 para verlo */}
+        {mostrarPanelPruebas && (
+          <SupabaseTestPanel projectNeed={projectNeed} recommendation={recommendation} />
         )}
       </main>
 
