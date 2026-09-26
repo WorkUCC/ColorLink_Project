@@ -12,12 +12,14 @@ import { SupplyAvailability } from "./components/SupplyAvailability";
 import { ServiceTracking } from "./components/ServiceTracking";
 import { QualityWarranty } from "./components/QualityWarranty";
 import { WhatsAppButton } from "./components/WhatsAppButton";
+import { HeroSection } from "./components/HeroSection";
 import {
   UserProfile,
   ProjectNeedState,
   TechnicalRecommendation,
   OrderState,
   DeliveryMethod,
+  SurfaceId,
 } from "./types";
 import { PINTUCO_PALETTES, DEMO_PRESETS, CERTIFIED_PAINTERS } from "./data/pintucoData";
 // --- Integración Supabase ---
@@ -27,8 +29,11 @@ import {
   guardarPedido,
   guardarServicio,
   guardarGarantia,
+  AdministradorAuth,
 } from "./lib/colorlinkApi";
 import { supabaseConfigurado } from "./lib/supabaseClient";
+import { AdminLoginScreen } from "./components/AdminLoginScreen";
+import { AdminDashboard } from "./components/AdminDashboard";
 
 export default function App() {
   // Step navigation: 1: Login/Account, 2: Need Wizard, 3: Technical Solution, 4: Supply, 5: Service/Tracking, 6: Quality/Warranty
@@ -63,6 +68,12 @@ export default function App() {
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("pruebas") === "1";
 
+  // Modo administrador: se activa con ?admin=1 en la URL
+  const esAdmin =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("admin") === "1";
+  const [adminAutenticado, setAdminAutenticado] = useState<AdministradorAuth | null>(null);
+
   // AI & technical recommendation state
   const [recommendation, setRecommendation] = useState<TechnicalRecommendation | null>(null);
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
@@ -82,6 +93,58 @@ export default function App() {
     driverEtaMinutes: 28,
     currentStepIndex: 0,
   });
+
+  // Estado para la barra de navegación secundaria (Sherwin-Williams style)
+  const [segmentoElegido, setSegmentoElegido] = useState<string | null>(null);
+  const [wizardInitialStep, setWizardInitialStep] = useState<number>(1);
+  const [isHotlineHighlighted, setIsHotlineHighlighted] = useState<boolean>(false);
+
+  // Manejadores de la barra de navegación
+  const handleSelectSurface = (surface: SurfaceId) => {
+    setProjectNeed((prev) => ({ ...prev, surface }));
+    setWizardInitialStep(1);
+    setCurrentStep(2);
+    setTimeout(() => {
+      const wizardEl = document.getElementById("wizard-container");
+      if (wizardEl) wizardEl.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
+
+  const handleGoToColorVisualizer = () => {
+    setWizardInitialStep(4);
+    setCurrentStep(2);
+    setTimeout(() => {
+      const vizEl =
+        document.getElementById("color-visualizer-container") ||
+        document.getElementById("wizard-container");
+      if (vizEl) vizEl.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+  };
+
+  const handleSelectSegmento = (segmento: string) => {
+    setSegmentoElegido(segmento);
+    setCurrentStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleClearSegmento = () => {
+    setSegmentoElegido(null);
+  };
+
+  const handleGoToTracking = () => {
+    setCurrentStep(5);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoToWarranty = () => {
+    setCurrentStep(6);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleHighlightHotline = () => {
+    setIsHotlineHighlighted(true);
+    setTimeout(() => setIsHotlineHighlighted(false), 3500);
+  };
 
   // Function to call the backend technical AI diagnostic engine
   const fetchTechnicalDiagnosis = async (
@@ -322,8 +385,27 @@ export default function App() {
     }
   }, [currentStep, recommendation, isDiagnosing, projectNeed]);
 
+  // Si la URL tiene el parámetro ?admin=1, mostramos la vista administrativa
+  if (esAdmin) {
+    return (
+      <div className="min-h-screen bg-slate-100 text-slate-900 font-sans selection:bg-[#00A896] selection:text-white">
+        {!adminAutenticado ? (
+          <AdminLoginScreen onLoginExitoso={(admin) => setAdminAutenticado(admin)} />
+        ) : (
+          <AdminDashboard
+            admin={adminAutenticado}
+            onCerrarSesion={() => setAdminAutenticado(null)}
+          />
+        )}
+        {mostrarPanelPruebas && (
+          <SupabaseTestPanel projectNeed={projectNeed} recommendation={recommendation} />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-[#00A896] selection:text-white">
+    <div className="min-h-screen bg-[#FAFAF9] text-[#1C1917] flex flex-col font-sans selection:bg-[#00A896] selection:text-white">
       {/* Global Brand Header */}
       <Header
         currentStep={currentStep}
@@ -338,10 +420,34 @@ export default function App() {
         }}
         onLoadPreset={handleLoadPreset}
         projectNeed={projectNeed}
+        segmentoElegido={segmentoElegido}
+        onSelectSegmento={handleSelectSegmento}
+        onClearSegmento={handleClearSegmento}
+        onSelectSurface={handleSelectSurface}
+        onGoToColorVisualizer={handleGoToColorVisualizer}
+        onGoToTracking={handleGoToTracking}
+        onGoToWarranty={handleGoToWarranty}
+        onHighlightHotline={handleHighlightHotline}
+        isHotlineHighlighted={isHotlineHighlighted}
       />
 
       {/* Main Flow Views */}
       <main className="flex-1">
+        {/* Hero Banner & Trust Badges at beginning of customer journey */}
+        {(currentStep === 1 || currentStep === 2) && (
+          <HeroSection
+            onStartDiagnostic={() => {
+              setCurrentStep(2);
+              setTimeout(() => {
+                const wizardEl = document.getElementById("wizard-container");
+                if (wizardEl) {
+                  wizardEl.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 50);
+            }}
+          />
+        )}
+
         {/* STEP 1: Login / Registration (Optional for visitors, available for registered customers) */}
         {currentStep === 1 && (
           <LoginScreen
@@ -350,17 +456,24 @@ export default function App() {
               setCurrentStep(2);
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
+            segmentoElegido={segmentoElegido}
+            onCambiarSegmento={handleClearSegmento}
           />
         )}
 
         {/* STEP 2: Client Need Onboarding Wizard */}
         {currentStep === 2 && (
-          <NeedWizard
-            initialState={projectNeed}
-            user={user}
-            onComplete={handleWizardComplete}
-            onBackToLogin={() => setCurrentStep(1)}
-          />
+          <div id="wizard-container">
+            <NeedWizard
+              initialState={projectNeed}
+              user={user}
+              onComplete={handleWizardComplete}
+              onBackToLogin={() => setCurrentStep(1)}
+              initialWizardStep={wizardInitialStep}
+              segmentoElegido={segmentoElegido}
+              onCambiarSegmento={handleClearSegmento}
+            />
+          </div>
         )}
 
         {/* STEP 3: AI-Assisted Technical Solution Card */}
@@ -420,18 +533,18 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#001D40] text-blue-200 py-6 border-t border-blue-950 text-xs">
+      <footer className="bg-[#001D40] text-stone-300 py-6 border-t border-stone-800 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-white">ColorLink by Pintuco</span>
-            <span className="text-blue-400">|</span>
-            <span>Ecosistema Digital de Solución Técnica, Servicio y Calidad</span>
+            <span className="text-stone-500">|</span>
+            <span className="text-stone-300">Solución técnica, abastecimiento y garantía oficial</span>
           </div>
 
-          <div className="flex items-center gap-4 text-blue-300">
-            <span>Garantía Oficial Pintuco Colombia</span>
+          <div className="flex items-center gap-4 text-stone-400">
+            <span>+80 años protegiendo a Colombia</span>
             <span>•</span>
-            <span>Línea Técnica: 018000 111 404</span>
+            <a href="tel:018000111404" className="hover:text-white transition">Línea Técnica: 018000 111 404</a>
           </div>
         </div>
       </footer>

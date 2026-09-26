@@ -7,7 +7,6 @@ import {
   Phone,
   MessageSquare,
   Calendar,
-  CreditCard,
   CheckCircle2,
   Clock,
   Truck,
@@ -18,7 +17,6 @@ import {
   RotateCcw,
   Sparkles,
   MapPin,
-  FileCheck,
   Award,
 } from "lucide-react";
 import {
@@ -66,8 +64,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
   const [chatMessages, setChatMessages] = useState<{ sender: "painter" | "user"; text: string; time: string }[]>([
     {
       sender: "painter",
-      text: `¡Hola! Soy ${selectedPainter.name}, tu maestro aplicador certificado Pintuco. Ya recibí la orden técnica de ${recommendation.productName} y estaré puntual en tu dirección.`,
-      time: "08:32 AM",
+      text: `¡Hola! Soy ${selectedPainter.name}, maestro certificado Pintuco. Tengo lista la orden de ${recommendation.productName} y estaré puntual en tu dirección.`,
+      time: "08:30 AM",
     },
   ]);
   const [newMessage, setNewMessage] = useState("");
@@ -75,31 +73,31 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
   const trackingSteps: { id: OrderTrackingStep; title: string; desc: string; icon: any }[] = [
     {
       id: "confirmado",
-      title: "1. Orden Confirmada",
+      title: "1. Orden confirmada",
       desc: "Pago y formulación aprobados por el sistema ColorLink.",
       icon: CheckCircle2,
     },
     {
       id: "tinturado_preparacion",
-      title: "2. Tinturado en Planta",
+      title: "2. Tinturado en planta",
       desc: `Mezclando código de color ${projectNeed.selectedColor.code} en laboratorio Pintuco.`,
       icon: Paintbrush,
     },
     {
       id: "en_camino",
-      title: "3. En Camino al Sitio",
+      title: "3. En camino al sitio",
       desc: `Móvil logístico Pintuco y ${selectedPainter.name} en ruta hacia tu dirección.`,
       icon: Truck,
     },
     {
       id: "en_sitio_aplicacion",
-      title: "4. En Sitio / Aplicación",
+      title: "4. En sitio y aplicación",
       desc: `Preparando superficie y aplicando 2 manos de ${recommendation.productName}.`,
       icon: ShieldCheck,
     },
     {
       id: "completado",
-      title: "5. Servicio Completado",
+      title: "5. Servicio completado",
       desc: "Inspección de acabado final y activación de póliza de garantía 360.",
       icon: Award,
     },
@@ -170,14 +168,13 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
         ...prev,
         {
           sender: "painter",
-          text: "¡Enterado! Tengo listos los plásticos de protección, lijas y el sellador antialcalino para dejar todo impecable.",
+          text: "¡Enterado! Tengo listos los plásticos de protección, lijas y el sellador para dejar todo impecable.",
           time: "Ahora",
         },
       ]);
     }, 1200);
   };
 
-  // Calculate final total based on service choice
   const calculatedTotal =
     serviceOption === "con_aplicador"
       ? recommendation.pricing.totalEstimated
@@ -185,131 +182,143 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
-      {/* Top Header */}
-      <div className="mb-8">
-        <span className="text-xs font-bold tracking-wider uppercase text-[#00A896]">
-          Paso 5 de 6 • Servicio, Aplicación & Tracking
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-          {isOrderConfirmed ? "Seguimiento de tu Servicio en Tiempo Real" : "Servicio de Aplicación y Agendamiento"}
+      {/* Step Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="text-xs font-semibold text-[#00A896]">
+            Paso 5 de 6
+          </span>
+          <span className="text-stone-300">·</span>
+          <span className="text-xs text-stone-500">
+            {isOrderConfirmed ? "Monitoreo en tiempo real" : "Servicio y agendamiento"}
+          </span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917]">
+          {isOrderConfirmed ? "Seguimiento de orden y aplicación en vivo" : "Servicio de aplicación y agendamiento"}
         </h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Inspirado en el modelo ServiceTitan + Uber: el cliente monitorea la preparación, llegada del aplicador y garantía desde una sola pantalla.
+        <p className="text-sm text-stone-500 mt-1">
+          {isOrderConfirmed
+            ? "Monitorea la preparación en planta, el desplazamiento del maestro y el avance de la obra."
+            : "Elige si deseas contratar un maestro pintor certificado o recibir solo los materiales."}
         </p>
       </div>
 
       {!isOrderConfirmed ? (
         /* Configuration Phase: Select Painter + Payment & Schedule */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left: Service & Painter Selection */}
+          {/* Left Column: Service & Painter Selection */}
           <div className="lg:col-span-8 space-y-6">
             {/* Service Toggle */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-              <h2 className="text-base font-bold text-slate-900">
-                ¿Deseas incluir la aplicación con un Maestro Certificado Pintuco?
+            <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+              <h2 className="text-sm font-bold text-[#1C1917]">
+                Modalidad del servicio
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div
                   onClick={() => setServiceOption("con_aplicador")}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                  className={`p-4 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
                     serviceOption === "con_aplicador"
-                      ? "border-[#002D62] bg-blue-50/60 shadow-sm ring-2 ring-[#002D62]/10"
-                      : "border-slate-200 hover:border-slate-300"
+                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
+                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
                   }`}
                   id="opt-service-painter"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#002D62] text-white flex items-center justify-center">
-                      <Paintbrush className="w-4 h-4" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                      Garantía Total 360
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900">Pintura + Aplicador Certificado</h3>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Un maestro verificado por Pintuco prepara la superficie, aplica las 2 manos y activa la póliza oficial.
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => setServiceOption("solo_materiales")}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    serviceOption === "solo_materiales"
-                      ? "border-[#002D62] bg-blue-50/60 shadow-sm ring-2 ring-[#002D62]/10"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                  id="opt-service-materials-only"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center">
-                      <UserCheck className="w-4 h-4" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
-                      Auto-aplicación
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900">Solo Materiales (Pintura)</h3>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Pides los galones y el sellador para aplicarlo tú mismo o con tu propio equipo de confianza.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Certified Painters Directory (Inspirado en Comex & ServiceTitan) */}
-            {serviceOption === "con_aplicador" && (
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-[#00A896]" />
-                      Buscador de Maestros Pintores Certificados en {projectNeed.city}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Profesionales evaluados por Pintuco con antecedentes legales, ARL y certificación técnica al día.
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-[#001D40] text-white flex items-center justify-center">
+                        <Paintbrush className="w-4 h-4 text-[#00A896]" />
+                      </div>
+                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                        Garantía completa
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-[#1C1917]">Pintura + Maestro certificado</h3>
+                    <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                      Un maestro avalado prepara la superficie, aplica las 2 manos y activa la póliza oficial Pintuco.
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-2">
+                <div
+                  onClick={() => setServiceOption("solo_materiales")}
+                  className={`p-4 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
+                    serviceOption === "solo_materiales"
+                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
+                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                  }`}
+                  id="opt-service-materials-only"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center">
+                        <UserCheck className="w-4 h-4 text-[#001D40]" />
+                      </div>
+                      <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
+                        Solo producto
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-[#1C1917]">Solo materiales</h3>
+                    <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                      Recibes la pintura, sellador y accesorios para aplicar por tu cuenta o con tu propio personal.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Certified Painters Directory */}
+            {serviceOption === "con_aplicador" && (
+              <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-[#1C1917] text-sm flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[#00A896]" />
+                      Maestros pintores certificados en {projectNeed.city}
+                    </h3>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      Profesionales con antecedentes verificados, seguridad social (ARL) y certificación Pintuco.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-1">
                   {CERTIFIED_PAINTERS.map((painter) => {
                     const isSelected = selectedPainter.id === painter.id;
                     return (
                       <div
                         key={painter.id}
                         onClick={() => setSelectedPainter(painter)}
-                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-3.5 ${
+                        className={`p-4 rounded-xl border cursor-pointer transition flex flex-col gap-3 ${
                           isSelected
-                            ? "border-[#002D62] bg-blue-50/50 shadow-md ring-2 ring-[#002D62]/15"
-                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                            ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
+                            : "border-[#E7E5E4] hover:border-stone-300 bg-white"
                         }`}
                         id={`painter-card-${painter.id}`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3.5">
                             <img
                               src={painter.photo}
                               alt={painter.name}
-                              className="w-14 h-14 rounded-2xl object-cover border-2 border-[#002D62]/20 shadow-sm"
+                              className="w-12 h-12 rounded-lg object-cover border border-stone-200 shadow-sm shrink-0"
                             />
                             <div>
                               <div className="flex items-center gap-2">
-                                <h4 className="font-bold text-sm text-slate-900">{painter.name}</h4>
-                                <div className="flex items-center gap-1 bg-amber-50 text-amber-800 text-xs font-bold px-2 py-0.5 rounded-md border border-amber-200">
+                                <h4 className="font-bold text-sm text-[#1C1917]">{painter.name}</h4>
+                                <div className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
                                   <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                                   <span>{painter.rating}</span>
-                                  <span className="text-[10px] text-amber-700">({painter.reviewsCount})</span>
+                                  <span className="text-stone-400 font-normal">({painter.reviewsCount})</span>
                                 </div>
                               </div>
-                              <p className="text-xs text-slate-600 mt-0.5">{painter.role}</p>
+                              <p className="text-xs text-stone-500">{painter.role}</p>
 
-                              <div className="flex flex-wrap gap-1.5 mt-2">
+                              <div className="flex flex-wrap gap-1 mt-1.5">
                                 {painter.badges.map((b, i) => (
                                   <span
                                     key={i}
-                                    className="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded-full"
+                                    className="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded"
                                   >
                                     {b}
                                   </span>
@@ -318,47 +327,41 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                             </div>
                           </div>
 
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 text-right shrink-0">
+                          <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-stone-100 text-right shrink-0">
                             <div>
-                              <span className="text-[11px] text-slate-500 block">Disponibilidad</span>
-                              <span className="text-xs font-bold text-emerald-700 block">{painter.availableSlot}</span>
+                              <span className="text-[11px] text-stone-400 block">Disponibilidad</span>
+                              <span className="text-xs font-semibold text-emerald-700 block">{painter.availableSlot}</span>
                             </div>
                             {isSelected ? (
-                              <div className="mt-2 flex items-center gap-1 text-xs font-bold text-[#002D62]">
+                              <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#00A896]">
                                 <CheckCircle2 className="w-4 h-4" /> Seleccionado
                               </div>
                             ) : (
-                              <button
-                                type="button"
-                                className="mt-2 text-xs font-bold text-[#00A896] hover:underline"
-                              >
-                                Seleccionar
-                              </button>
+                              <span className="mt-1 text-xs font-medium text-stone-500 hover:text-stone-800">
+                                Elegir este maestro
+                              </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Painter Portfolio Works Gallery */}
+                        {/* Portfolio Gallery */}
                         {painter.portfolioPhotos && painter.portfolioPhotos.length > 0 && (
-                          <div className="pt-2 border-t border-slate-200/70">
-                            <span className="text-[11px] font-bold text-slate-700 block mb-1.5">
-                              📸 Galería de Obras Previas Certificadas ({painter.name.split(" ")[0]}):
+                          <div className="pt-2 border-t border-stone-100">
+                            <span className="text-[11px] font-semibold text-stone-600 block mb-1">
+                              Obras previas realizadas:
                             </span>
                             <div className="grid grid-cols-3 gap-2">
                               {painter.portfolioPhotos.map((imgUrl, pIdx) => (
                                 <div
                                   key={pIdx}
-                                  className="relative group rounded-xl overflow-hidden aspect-video border border-slate-200 shadow-2xs"
+                                  className="relative rounded-lg overflow-hidden aspect-video border border-stone-200"
                                 >
                                   <img
                                     src={imgUrl}
                                     alt={`Trabajo previo ${pIdx + 1}`}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    className="w-full h-full object-cover"
                                     referrerPolicy="no-referrer"
                                   />
-                                  <span className="absolute bottom-1 left-1 bg-black/60 backdrop-blur-xs text-[9px] text-white px-1.5 py-0.2 rounded font-medium">
-                                    Pintuco 360
-                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -372,90 +375,90 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
             )}
 
             {/* Schedule Date & Time */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#002D62]" />
-                Fecha y Hora Sugerida para el Servicio
+            <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+              <h3 className="font-bold text-[#1C1917] text-sm flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#001D40]" />
+                Fecha y horario del servicio
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Fecha de inicio</label>
                   <input
                     type="date"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-[#00A896] bg-white"
+                    className="w-full p-2.5 rounded-lg border border-[#E7E5E4] text-sm focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Jornada</label>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">Jornada</label>
                   <select
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-[#00A896] bg-white"
+                    className="w-full p-2.5 rounded-lg border border-[#E7E5E4] text-sm focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
                   >
                     <option value="08:00 AM">Mañana (8:00 AM - 12:00 PM)</option>
                     <option value="01:30 PM">Tarde (1:30 PM - 5:30 PM)</option>
-                    <option value="Jornada Completa">Jornada Completa (Obra Continua)</option>
+                    <option value="Jornada Completa">Jornada continua</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right: Payment & Summary */}
+          {/* Right Column: Payment & Summary */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-              <h3 className="font-bold text-slate-900 text-base pb-3 border-b border-slate-100">
-                Resumen del Pedido
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E7E5E4]">
+              <h3 className="font-bold text-[#1C1917] text-sm pb-3 border-b border-stone-100">
+                Resumen de orden
               </h3>
 
-              <div className="py-3 space-y-2.5 text-xs text-slate-600">
+              <div className="py-3 space-y-2 text-xs text-stone-600">
                 <div className="flex justify-between">
                   <span>Producto:</span>
-                  <strong className="text-slate-900 text-right">{recommendation.productName}</strong>
+                  <span className="font-semibold text-stone-900 text-right">{recommendation.productName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Volumen ({projectNeed.areaM2} m²):</span>
-                  <span className="font-semibold text-slate-900">{recommendation.calculation.recommendedFormat}</span>
+                  <span>Cantidad ({projectNeed.areaM2} m²):</span>
+                  <span className="font-semibold text-stone-900">{recommendation.calculation.recommendedFormat}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tono Pintuco:</span>
-                  <span className="font-semibold text-slate-900">{projectNeed.selectedColor.name}</span>
+                  <span>Color:</span>
+                  <span className="font-semibold text-stone-900">{projectNeed.selectedColor.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Servicio:</span>
-                  <span className="font-semibold text-slate-900">
-                    {serviceOption === "con_aplicador" ? "Pintura + Maestro Certificado" : "Solo Materiales"}
+                  <span>Modalidad:</span>
+                  <span className="font-semibold text-stone-900">
+                    {serviceOption === "con_aplicador" ? "Pintura + Maestro" : "Solo pintura"}
                   </span>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex justify-between items-baseline">
-                  <span className="font-bold text-slate-800 text-sm">Total a Pagar:</span>
-                  <span className="text-xl font-black text-[#002D62]">
+                <div className="pt-3 border-t border-stone-100 flex justify-between items-baseline">
+                  <span className="font-bold text-stone-800 text-sm">Total final:</span>
+                  <span className="text-xl font-bold text-[#001D40]">
                     ${calculatedTotal.toLocaleString("es-CO")} COP
                   </span>
                 </div>
               </div>
 
               {/* Payment Method Selector */}
-              <div className="pt-4 border-t border-slate-100 space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                  Método de Pago Seguro
+              <div className="pt-4 border-t border-stone-100 space-y-2">
+                <label className="block text-xs font-semibold text-stone-700 mb-2">
+                  Método de pago
                 </label>
                 {[
-                  { id: "pse" as const, name: "PSE / Transferencia Bancaria (Bancolombia, Davivienda, Nequi)" },
-                  { id: "tarjeta_credito" as const, name: "Tarjeta de Crédito / Débito (Visa, Master, Amex)" },
-                  { id: "contra_entrega" as const, name: "Pago Contra Entrega en Sitio / Datáfono" },
+                  { id: "pse" as const, name: "PSE / Transferencia (Bancolombia, Nequi, Davivienda)" },
+                  { id: "tarjeta_credito" as const, name: "Tarjeta de crédito o débito" },
+                  { id: "contra_entrega" as const, name: "Pago contra entrega con datáfono" },
                 ].map((pm) => (
                   <label
                     key={pm.id}
                     onClick={() => setPaymentMethod(pm.id)}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center gap-2.5 p-3 rounded-lg border text-xs cursor-pointer transition ${
                       paymentMethod === pm.id
-                        ? "border-[#002D62] bg-blue-50 text-[#002D62] font-bold"
-                        : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                        ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
+                        : "border-[#E7E5E4] text-stone-700 hover:bg-stone-50"
                     }`}
                   >
                     <input
@@ -463,33 +466,21 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                       name="payment_method"
                       checked={paymentMethod === pm.id}
                       onChange={() => setPaymentMethod(pm.id)}
-                      className="accent-[#002D62]"
+                      className="accent-[#00A896]"
                     />
                     <span>{pm.name}</span>
                   </label>
                 ))}
               </div>
 
-              {/* Cancellation & Rescheduling Policy Notice */}
-              <div className="mt-4 p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-[11px] text-emerald-950 space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-emerald-900">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                  <span>Política de Cancelación & Reprogramación Gratuita</span>
-                </div>
-                <p className="text-emerald-800 leading-relaxed">
-                  • <strong>Reprogramación sin costo:</strong> Hasta 12 horas antes de la cita pactada.<br />
-                  • <strong>Cancelación 100% garantizada:</strong> Reembolso total previo al inicio de tinturado de fábrica.
-                </p>
-              </div>
-
               {/* Confirm CTA */}
               <button
                 type="button"
                 onClick={handleConfirmOrder}
-                className="w-full mt-4 bg-[#002D62] hover:bg-[#003882] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-[#002D62]/20 transition-all flex items-center justify-center gap-2"
+                className="w-full mt-5 bg-[#00A896] hover:bg-[#009282] text-white font-medium py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm"
                 id="btn-confirm-order-service"
               >
-                <span>Confirmar y Ver Tracking en Vivo</span>
+                <span>Confirmar orden y ver tracking</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -497,76 +488,76 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
             <button
               type="button"
               onClick={onBackToSupply}
-              className="w-full py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5"
+              className="w-full py-2 text-xs font-medium text-stone-500 hover:text-stone-900 inline-flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Volver a Disponibilidad
+              <ArrowLeft className="w-3.5 h-3.5" /> Volver a disponibilidad
             </button>
           </div>
         </div>
       ) : (
-        /* Active Live Tracking Interface (ServiceTitan & Uber Style) */
-        <div className="space-y-8">
+        /* Active Live Tracking Interface */
+        <div className="space-y-6">
           {/* Tracking Control Simulation Bar */}
-          <div className="bg-slate-900 text-white p-4 sm:p-5 rounded-3xl shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-[#001D40] text-white p-5 rounded-xl shadow-sm border border-stone-800 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#00A896] text-white flex items-center justify-center font-black">
-                <Truck className="w-5 h-5 animate-bounce" />
+              <div className="w-10 h-10 rounded-lg bg-[#00A896] text-white flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[#00E5C9] uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-[#00A896]">
                     Orden #{orderState.orderId}
                   </span>
-                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                    En Vivo (Live GPS)
+                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-medium px-2 py-0.5 rounded">
+                    En vivo
                   </span>
                 </div>
-                <h3 className="text-sm sm:text-base font-bold text-white">
+                <h3 className="text-sm font-bold text-white mt-0.5">
                   Estado actual: {trackingSteps[currentStepIndex]?.title}
                 </h3>
               </div>
             </div>
 
-            {/* Interactive simulation buttons */}
+            {/* Simulation controls */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleNextStepSim}
                 disabled={currentStepIndex >= trackingSteps.length - 1}
-                className="bg-[#00A896] hover:bg-[#008f80] disabled:opacity-40 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5"
+                className="bg-[#00A896] hover:bg-[#009282] disabled:opacity-40 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer"
                 id="btn-sim-next-step"
               >
-                <span>Avanzar Estado</span>
+                <span>Avanzar estado</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <button
                 type="button"
                 onClick={() => setAutoSimulating(!autoSimulating)}
-                className={`text-xs font-bold px-3 py-2 rounded-xl border transition-colors flex items-center gap-1 ${
+                className={`text-xs font-medium px-3 py-2 rounded-lg border transition inline-flex items-center gap-1 cursor-pointer ${
                   autoSimulating
-                    ? "bg-amber-500 text-black border-amber-500"
-                    : "bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700"
+                    ? "bg-amber-500 text-stone-950 border-amber-500 font-semibold"
+                    : "bg-white/10 text-stone-200 border-white/10 hover:bg-white/20"
                 }`}
               >
                 <Play className="w-3 h-3" />
-                <span>{autoSimulating ? "Pausar Auto-Play" : "Auto-Play"}</span>
+                <span>{autoSimulating ? "Pausar avance" : "Avance auto"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleResetSim}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700"
-                title="Reiniciar Simulación"
+                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-stone-300 text-xs border border-white/10 cursor-pointer"
+                title="Reiniciar simulación"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Stepper Progress Visualizer */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 relative">
+          {/* Stepper Progress */}
+          <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
               {trackingSteps.map((step, idx) => {
                 const Icon = step.icon;
                 const isPassed = currentStepIndex > idx;
@@ -575,27 +566,27 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                 return (
                   <div
                     key={step.id}
-                    className={`flex flex-col items-center text-center p-3 rounded-2xl transition-all ${
+                    className={`flex flex-col items-center text-center p-3 rounded-lg transition ${
                       isCurrent
-                        ? "bg-blue-50 border-2 border-[#002D62] shadow-sm"
+                        ? "bg-[#00A896]/5 border border-[#00A896]"
                         : isPassed
-                        ? "bg-emerald-50/50 border border-emerald-200"
+                        ? "bg-emerald-50 border border-emerald-200"
                         : "opacity-40 border border-transparent"
                     }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-2 font-bold ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 font-bold ${
                         isCurrent
-                          ? "bg-[#002D62] text-white ring-4 ring-blue-100"
+                          ? "bg-[#00A896] text-white"
                           : isPassed
                           ? "bg-emerald-600 text-white"
-                          : "bg-slate-200 text-slate-500"
+                          : "bg-stone-200 text-stone-500"
                       }`}
                     >
-                      {isPassed ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                      {isPassed ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                     </div>
-                    <h4 className="text-xs font-bold text-slate-900 leading-tight">{step.title}</h4>
-                    <p className="text-[10px] text-slate-500 mt-1 leading-snug hidden sm:block">
+                    <h4 className="text-xs font-bold text-[#1C1917] leading-tight">{step.title}</h4>
+                    <p className="text-[10px] text-stone-500 mt-1 leading-snug hidden sm:block">
                       {step.desc}
                     </p>
                   </div>
@@ -605,13 +596,11 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
           </div>
 
           {/* Live Map & Technician Dispatch Panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Live Map Visualizer */}
-            <div className="lg:col-span-7 bg-slate-900 rounded-3xl overflow-hidden shadow-lg border border-slate-800 relative flex flex-col justify-between min-h-[360px]">
-              {/* Simulated Map Graphic */}
-              <div className="relative w-full h-64 bg-[#1E293B] overflow-hidden flex items-center justify-center">
+            <div className="lg:col-span-7 bg-[#001D40] rounded-xl overflow-hidden shadow-sm border border-stone-800 flex flex-col justify-between min-h-[340px]">
+              <div className="relative w-full h-64 bg-slate-900 overflow-hidden flex items-center justify-center">
                 <svg viewBox="0 0 600 300" className="w-full h-full object-cover opacity-80">
-                  {/* Grid / Roads */}
                   <line x1="50" y1="0" x2="50" y2="300" stroke="#334155" strokeWidth="12" />
                   <line x1="200" y1="0" x2="200" y2="300" stroke="#334155" strokeWidth="8" />
                   <line x1="400" y1="0" x2="400" y2="300" stroke="#334155" strokeWidth="16" />
@@ -619,104 +608,94 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                   <line x1="0" y1="200" x2="600" y2="200" stroke="#334155" strokeWidth="14" />
                   <path d="M 50,80 Q 200,120 400,200" fill="none" stroke="#00A896" strokeWidth="6" strokeDasharray="8 6" />
 
-                  {/* Route trajectory */}
                   {currentStepIndex >= 2 && (
-                    <circle cx={currentStepIndex === 2 ? "260" : "400"} cy={currentStepIndex === 2 ? "140" : "200"} r="10" fill="#00E5C9">
-                      <animate attributeName="r" values="8;14;8" dur="1.5s" repeatCount="indefinite" />
+                    <circle cx={currentStepIndex === 2 ? "260" : "400"} cy={currentStepIndex === 2 ? "140" : "200"} r="10" fill="#00A896">
+                      <animate attributeName="r" values="8;13;8" dur="1.5s" repeatCount="indefinite" />
                     </circle>
                   )}
 
-                  {/* Warehouse Point */}
-                  <rect x="35" y="65" width="30" height="30" rx="6" fill="#002D62" stroke="#FFFFFF" strokeWidth="2" />
+                  <rect x="35" y="65" width="30" height="30" rx="6" fill="#001D40" stroke="#FFFFFF" strokeWidth="2" />
                   <text x="40" y="85" fill="#FFFFFF" fontSize="10" fontWeight="bold">PT</text>
 
-                  {/* Customer Destination Point */}
-                  <circle cx="400" cy="200" r="14" fill="#E11D48" stroke="#FFFFFF" strokeWidth="3" />
-                  <text x="394" y="204" fill="#FFFFFF" fontSize="11" fontWeight="bold">📍</text>
+                  <circle cx="400" cy="200" r="14" fill="#00A896" stroke="#FFFFFF" strokeWidth="3" />
+                  <text x="395" y="204" fill="#FFFFFF" fontSize="11" fontWeight="bold">✓</text>
                 </svg>
 
-                {/* Map Floating Status Card */}
-                <div className="absolute top-4 left-4 bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-white text-xs shadow-md">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="font-bold">Despacho Pintuco Centro</span>
-                  </div>
-                  <span className="text-[11px] text-slate-300 block mt-0.5">
-                    Hacia: {projectNeed.address || "Dirección de Obra"} ({projectNeed.city})
+                <div className="absolute top-4 left-4 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-700 text-white text-xs">
+                  <span className="font-semibold block">Despacho Pintuco autorizado</span>
+                  <span className="text-[11px] text-stone-300">
+                    Destino: {projectNeed.address || "Dirección de obra"} ({projectNeed.city})
                   </span>
                 </div>
 
-                <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700 text-white text-xs shadow-md">
-                  <span className="text-[10px] text-slate-400 block uppercase font-bold">Tiempo estimado</span>
-                  <span className="text-sm font-black text-[#00E5C9]">
-                    {currentStepIndex >= 4 ? "En Sitio • Completado" : `${orderState.driverEtaMinutes} min restantes`}
+                <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-700 text-white text-xs">
+                  <span className="text-[10px] text-stone-400 block uppercase font-medium">Tiempo estimado</span>
+                  <span className="text-xs font-bold text-[#00A896]">
+                    {currentStepIndex >= 4 ? "En sitio · Completado" : `${orderState.driverEtaMinutes} min restantes`}
                   </span>
                 </div>
               </div>
 
-              {/* Bottom bar of map */}
-              <div className="p-4 bg-slate-950 text-xs text-slate-300 flex items-center justify-between border-t border-slate-800">
+              <div className="p-3.5 bg-slate-950 text-xs text-stone-300 flex items-center justify-between border-t border-slate-800">
                 <div className="flex items-center gap-2">
                   <Navigation className="w-4 h-4 text-[#00A896]" />
-                  <span>Ruta optimizada con Centro de Tinturado Pintuco</span>
+                  <span>Ruta asistida con planta de tinturado</span>
                 </div>
-                <span className="text-slate-400">Lote de fabricación: #PNT-8942-A</span>
+                <span className="text-stone-400 text-[11px]">Lote: #PNT-8942-A</span>
               </div>
             </div>
 
             {/* Assigned Painter Card & Live Chat */}
             <div className="lg:col-span-5 space-y-4">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Técnico / Aplicador Asignado
+              <div className="bg-white p-5 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <span className="text-xs font-semibold text-stone-600">
+                    Maestro aplicador asignado
                   </span>
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                    Certificación Vigente
+                  <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                    Certificación Pintuco
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3">
                   <img
                     src={selectedPainter.photo}
                     alt={selectedPainter.name}
-                    className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-sm"
+                    className="w-12 h-12 rounded-lg object-cover border border-stone-200 shadow-sm shrink-0"
                   />
                   <div>
-                    <h4 className="font-bold text-sm text-slate-900">{selectedPainter.name}</h4>
-                    <p className="text-xs text-slate-500">{selectedPainter.role}</p>
-                    <div className="flex items-center gap-1 text-xs text-amber-600 font-bold mt-1">
+                    <h4 className="font-bold text-sm text-[#1C1917]">{selectedPainter.name}</h4>
+                    <p className="text-xs text-stone-500">{selectedPainter.role}</p>
+                    <div className="flex items-center gap-1 text-xs text-amber-700 font-semibold mt-0.5">
                       <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                       <span>{selectedPainter.rating}</span>
-                      <span className="text-slate-400">({selectedPainter.completedJobs} obras concluidas)</span>
+                      <span className="text-stone-400 font-normal">({selectedPainter.completedJobs} obras)</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Direct action buttons: Call / Chat */}
-                <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   <a
                     href={`tel:${selectedPainter.phone}`}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors"
+                    className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5"
                   >
-                    <Phone className="w-3.5 h-3.5 text-[#002D62]" />
-                    <span>Llamar Técnico</span>
+                    <Phone className="w-3.5 h-3.5 text-[#00A896]" />
+                    <span>Llamar</span>
                   </a>
 
                   <button
                     type="button"
                     onClick={() => setChatOpen(!chatOpen)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#002D62] text-white text-xs font-bold hover:bg-[#003882] transition-colors"
+                    className="bg-[#001D40] hover:bg-stone-800 text-white font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span>{chatOpen ? "Cerrar Chat" : "Mensaje Directo"}</span>
+                    <span>{chatOpen ? "Ocultar chat" : "Mensaje"}</span>
                   </button>
                 </div>
 
-                {/* Inline chat drawer */}
                 {chatOpen && (
-                  <div className="mt-3 p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 animate-in fade-in">
-                    <div className="max-h-40 overflow-y-auto space-y-2 pr-1 text-xs">
+                  <div className="mt-3 p-3 bg-stone-50 rounded-lg border border-stone-200 space-y-2.5">
+                    <div className="max-h-36 overflow-y-auto space-y-2 pr-1 text-xs">
                       {chatMessages.map((msg, i) => (
                         <div
                           key={i}
@@ -725,54 +704,17 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                           }`}
                         >
                           <div
-                            className={`p-2.5 rounded-xl max-w-[85%] ${
+                            className={`p-2.5 rounded-lg max-w-[85%] ${
                               msg.sender === "user"
-                                ? "bg-[#002D62] text-white rounded-br-none"
-                                : "bg-white text-slate-800 border border-slate-200 rounded-bl-none shadow-2xs"
+                                ? "bg-[#001D40] text-white"
+                                : "bg-white text-stone-800 border border-stone-200 shadow-2xs"
                             }`}
                           >
                             <p>{msg.text}</p>
                           </div>
-                          <span className="text-[9px] text-slate-400 mt-0.5">{msg.time}</span>
+                          <span className="text-[9px] text-stone-400 mt-0.5">{msg.time}</span>
                         </div>
                       ))}
-                    </div>
-
-                    {/* Quick Instruction Chips for Customer */}
-                    <div className="space-y-1 pt-1 border-t border-slate-200/80">
-                      <span className="text-[10px] text-slate-500 font-bold block">
-                        Instrucciones rápidas para el maestro:
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {[
-                          "🔔 El timbre está dañado, por favor golpear fuerte",
-                          "🏢 Dejar materiales con el portero en recepción",
-                          "🚗 Hay parqueadero de visitantes disponible",
-                          "📞 Llamar al celular al llegar a portería",
-                        ].map((quickText, qIdx) => (
-                          <button
-                            key={qIdx}
-                            type="button"
-                            onClick={() => {
-                              const userMsg = { sender: "user" as const, text: quickText, time: "Ahora" };
-                              setChatMessages((prev) => [...prev, userMsg]);
-                              setTimeout(() => {
-                                setChatMessages((prev) => [
-                                  ...prev,
-                                  {
-                                    sender: "painter",
-                                    text: "¡Perfecto, anotado en la bitácora de visita técnica!",
-                                    time: "Ahora",
-                                  },
-                                ]);
-                              }, 1000);
-                            }}
-                            className="text-[10px] bg-white hover:bg-slate-100 text-slate-700 font-medium px-2 py-1 rounded-lg border border-slate-200 text-left transition-colors cursor-pointer"
-                          >
-                            {quickText}
-                          </button>
-                        ))}
-                      </div>
                     </div>
 
                     <form onSubmit={handleSendMessage} className="flex gap-1.5 pt-1">
@@ -780,12 +722,12 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Escribe instrucciones o detalles..."
-                        className="flex-1 p-2 text-xs rounded-xl border border-slate-300 bg-white"
+                        placeholder="Escribe un mensaje..."
+                        className="flex-1 p-2 text-xs rounded-lg border border-stone-300 bg-white text-[#1C1917]"
                       />
                       <button
                         type="submit"
-                        className="bg-[#00A896] text-white text-xs px-3 py-1.5 rounded-xl font-bold cursor-pointer"
+                        className="bg-[#00A896] hover:bg-[#009282] text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer"
                       >
                         Enviar
                       </button>
@@ -795,22 +737,22 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
               </div>
 
               {/* Ready for Warranty Next Step CTA */}
-              <div className="bg-gradient-to-br from-emerald-600 to-teal-800 text-white p-5 rounded-3xl shadow-md space-y-3">
+              <div className="bg-white p-5 rounded-xl border border-[#E7E5E4] shadow-sm space-y-3">
                 <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-200" />
-                  <h4 className="font-bold text-sm">Garantía Pintuco 360 Lista</h4>
+                  <Award className="w-4 h-4 text-[#00A896]" />
+                  <h4 className="font-bold text-sm text-[#1C1917]">Póliza de garantía Pintuco 360</h4>
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
-                  Al completar el servicio, se emite automáticamente la póliza digital de garantía y la encuesta de satisfacción.
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  Al completar la aplicación y la entrega, se emite automáticamente el certificado digital oficial.
                 </p>
                 <button
                   type="button"
                   onClick={onProceedToQuality}
-                  className="w-full bg-white text-emerald-900 hover:bg-emerald-50 font-extrabold text-xs py-3 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 group"
+                  className="w-full bg-[#00A896] hover:bg-[#009282] text-white font-medium text-xs py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
                   id="btn-proceed-quality"
                 >
-                  <span>Finalizar Servicio y Ver Garantía 360</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span>Finalizar servicio y ver garantía</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
