@@ -48,6 +48,7 @@ const formatoCOP = new Intl.NumberFormat("es-CO", {
 const ESTADOS: { valor: EstadoPedido; etiqueta: string }[] = [
   { valor: "confirmado", etiqueta: "Confirmado" },
   { valor: "tinturado_preparacion", etiqueta: "Alistando / Tinturado" },
+  { valor: "empacado", etiqueta: "Empacado y listo para despacho" },
   { valor: "en_camino", etiqueta: "En camino" },
   { valor: "en_sitio_aplicacion", etiqueta: "En sitio de aplicación" },
   { valor: "completado", etiqueta: "Completado" },
@@ -57,6 +58,7 @@ const ESTADOS: { valor: EstadoPedido; etiqueta: string }[] = [
 const ESTADO_ESTILOS: Record<string, string> = {
   confirmado: "bg-blue-50 text-blue-700 border-blue-200",
   tinturado_preparacion: "bg-amber-50 text-amber-700 border-amber-200",
+  empacado: "bg-sky-50 text-sky-700 border-sky-200",
   en_camino: "bg-indigo-50 text-indigo-700 border-indigo-200",
   en_sitio_aplicacion: "bg-purple-50 text-purple-700 border-purple-200",
   completado: "bg-emerald-50 text-emerald-700 border-emerald-200",

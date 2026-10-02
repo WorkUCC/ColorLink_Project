@@ -37,6 +37,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
   onProceedToSupply,
   onBackToWizard,
   onRefineWithAI,
+  onLoginClick,
 }) => {
   const [userQuery, setUserQuery] = useState("");
   const [isAsking, setIsAsking] = useState(false);
@@ -176,6 +177,15 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
               Puedes adquirir esta solución como visitante, o iniciar sesión para acceder al 15% de ahorro oficial.
             </span>
           </div>
+          {onLoginClick && (
+            <button
+              type="button"
+              onClick={onLoginClick}
+              className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer shadow-xs"
+            >
+              Iniciar sesión
+            </button>
+          )}
         </div>
       )}
 
@@ -359,7 +369,25 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                 </div>
               </div>
 
-              {user && (
+              {!user ? (
+                <div className="flex items-center justify-between text-xs bg-emerald-50/70 border border-emerald-200/80 text-emerald-900 px-2.5 py-1.5 rounded-lg font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <span>Descuento VIP cliente (-15%):</span>
+                    <span className="text-[11px] text-stone-500 font-normal">
+                      (-${Math.round(productBasePrice * 0.15).toLocaleString("es-CO")} COP)
+                    </span>
+                  </div>
+                  {onLoginClick && (
+                    <button
+                      type="button"
+                      onClick={onLoginClick}
+                      className="bg-[#00A896] hover:bg-[#009282] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md cursor-pointer transition shadow-xs shrink-0"
+                    >
+                      Iniciar sesión
+                    </button>
+                  )}
+                </div>
+              ) : (
                 <div className="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg font-medium">
                   <span>Descuento VIP cliente (-15%):</span>
                   <span>-${memberDiscountAmount.toLocaleString("es-CO")} COP</span>

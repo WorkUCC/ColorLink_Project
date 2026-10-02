@@ -16,6 +16,8 @@ import {
   LayoutGrid,
   Maximize2,
   Umbrella,
+  TreePine,
+  ShieldAlert,
   Palette,
   Users,
   Briefcase,
@@ -43,6 +45,7 @@ interface HeaderProps {
   onGoToWarranty?: () => void;
   onHighlightHotline?: () => void;
   isHotlineHighlighted?: boolean;
+  onOpenLoginModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -61,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   onGoToWarranty,
   onHighlightHotline,
   isHotlineHighlighted,
+  onOpenLoginModal,
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -251,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
               Modo cotizador abierto
             </span>
             <button
-              onClick={() => onNavigateStep(1)}
+              onClick={() => (onOpenLoginModal ? onOpenLoginModal() : onNavigateStep(1))}
               className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-semibold px-4 py-2 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
               id="btn-login-header"
             >
@@ -334,6 +338,42 @@ export const Header: React.FC<HeaderProps> = ({
                       </p>
                       <p className="text-[11px] text-stone-500 leading-tight">
                         Viniltex lavable y acabados mate sedoso
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSurfaceClick("madera_decks")}
+                    className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-stone-50 text-left transition-colors group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-teal-50 group-hover:bg-[#00A896] text-[#00A896] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                      <TreePine className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1C1917] group-hover:text-[#00A896] transition-colors">
+                        Madera, Decks y Muebles
+                      </p>
+                      <p className="text-[11px] text-stone-500 leading-tight">
+                        Maderprotect, filtros UV y barnices nobles
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSurfaceClick("metales_estructuras")}
+                    className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-stone-50 text-left transition-colors group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-teal-50 group-hover:bg-[#00A896] text-[#00A896] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                      <ShieldAlert className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1C1917] group-hover:text-[#00A896] transition-colors">
+                        Metales, Rejas y Estructuras
+                      </p>
+                      <p className="text-[11px] text-stone-500 leading-tight">
+                        Pintulux 3 en 1 anticorrosivo y esmaltes
                       </p>
                     </div>
                   </button>
@@ -786,6 +826,22 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <LayoutGrid className="w-3.5 h-3.5 text-[#00A896]" />
                     <span>Paredes y Cielorrasos Interiores</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSurfaceClick("madera_decks")}
+                    className="w-full text-left py-1.5 text-stone-700 hover:text-[#00A896] font-medium flex items-center gap-2"
+                  >
+                    <TreePine className="w-3.5 h-3.5 text-[#00A896]" />
+                    <span>Madera, Decks y Muebles</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSurfaceClick("metales_estructuras")}
+                    className="w-full text-left py-1.5 text-stone-700 hover:text-[#00A896] font-medium flex items-center gap-2"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-[#00A896]" />
+                    <span>Metales, Rejas y Estructuras</span>
                   </button>
                   <button
                     type="button"

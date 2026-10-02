@@ -52,29 +52,32 @@ export interface EscenaConfig {
 /**
  * 6 FOTOS CURADAS Y REVISADAS PARA EL SIMULADOR DE COLOR:
  *
- * 1. SALA (ID: 8143678)
- *    Autor: Max Vakhtbovych
- *    Espacio: Sala amplia y luminosa con pared focal blanca, sofá moderno y pisos de madera.
+ * 1. SALA (ID: 10001)
+ *    Espacio: Sala de diseño orgánico con sofá curvo y amplia pared de fondo focal.
+ *    Polígono: Recorta exactamente la pared posterior, excluyendo ventanal izquierdo, pilar derecho y sofá.
  *
  * 2. HABITACIÓN (ID: 6580214)
  *    Autor: Max Vakhtbovych
- *    Espacio: Dormitorio contemporáneo con cama principal, mesitas de noche y pared cabecera blanca.
+ *    Espacio: Dormitorio contemporáneo con cama principal y pared cabecera blanca.
+ *    Polígono: Recorta la pared cabecera entre cortinas y armario, por encima del respaldar.
  *
- * 3. COCINA (ID: 8135507)
- *    Autor: Max Vakhtbovych
- *    Espacio: Cocina abierta moderna con isla, muebles limpios y paredes bien iluminadas.
+ * 3. COCINA (ID: 271647)
+ *    Autor: Pixabay
+ *    Espacio: Cocina y comedor contemporáneo despejado con luz natural y pared blanca amplia.
+ *    Polígono: Recorta la pared completa por encima de la mesa/barra, dejando muebles y vajilla intactos.
  *
- * 4. BAÑO (ID: 6588585)
- *    Autor: Max Vakhtbovych
- *    Espacio: Baño claro de diseño minimalista con espejo, grifería moderna y paredes limpias.
+ * 4. BAÑO (ID: 10004)
+ *    Espacio: Baño de lujo con tina exenta, tocador de madera y pared de acento.
+ *    Polígono: Recorta la pared superior, respetando la ventana vertical, la tina y el tocador.
  *
- * 5. OFICINA (ID: 8092313)
- *    Autor: Kaboompics
- *    Espacio: Estudio / home office con escritorio blanco, laptop, planta y gran pared de fondo.
+ * 5. OFICINA (ID: 10567351)
+ *    Autor: Cup of Couple
+ *    Espacio: Home office minimalista con escritorio de madera y amplia pared limpia sin obstrucciones.
+ *    Polígono: Recorta la pared superior completa, dejando el escritorio, silla y piso intactos.
  *
- * 6. FACHADA (ID: 1974596)
- *    Autor: Julia Kuzenkov
- *    Espacio: Fachada exterior contemporánea blanca de 2 niveles con cielo despejado y jardín.
+ * 6. FACHADA (ID: 10006)
+ *    Espacio: Fachada exterior contemporánea de dos niveles con jardín y cielo.
+ *    Polígono: Recorta los muros de estuco, respetando el cielo azul superior y el prado/jardín inferior.
  */
 export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
   sala: {
@@ -92,9 +95,9 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
     icon: <Bed className="w-3.5 h-3.5" />,
   },
   cocina: {
-    id: 8135507,
-    url: "https://images.pexels.com/photos/8135507/pexels-photo-8135507.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-    query: "modern minimalist kitchen interior wall",
+    id: 271647,
+    url: "https://images.pexels.com/photos/271647/pexels-photo-271647.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    query: "sleek modern kitchen and dining area with natural light wall",
     label: "Cocina",
     icon: <UtensilsCrossed className="w-3.5 h-3.5" />,
   },
@@ -106,9 +109,9 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
     icon: <Bath className="w-3.5 h-3.5" />,
   },
   oficina: {
-    id: 8092313,
-    url: "https://images.pexels.com/photos/8092313/pexels-photo-8092313.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-    query: "modern home office interior workspace wall",
+    id: 10567351,
+    url: "https://images.pexels.com/photos/10567351/pexels-photo-10567351.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    query: "minimalist home office wooden desk empty wall",
     label: "Oficina",
     icon: <Briefcase className="w-3.5 h-3.5" />,
   },
@@ -119,6 +122,36 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
     label: "Fachada",
     icon: <DoorOpen className="w-3.5 h-3.5" />,
   },
+};
+
+/**
+ * Polígonos CSS (clip-path: polygon(...)) a la medida exacta de la pared
+ * en cada una de las 6 escenas, preservando piso, techo, muebles, marcos y ventanas.
+ */
+export const CLIP_PATHS_PARED_ESCENAS: Record<EscenaVisualizador, string> = {
+  // Sala: Pared de fondo focal detrás del sofá curvo.
+  // Evita ventana y cortina lateral (<16%), pilar derecho (>88%) y sofá/mesa/piso (>57%).
+  sala: "polygon(16% 0%, 88% 0%, 88% 58%, 65% 58%, 40% 57%, 16% 56%)",
+
+  // Habitación: Pared cabecera detrás de la cama principal.
+  // Evita cortinas izquierdas (<3%), armario lateral (>71%) y cabecera con almohadas (>63%).
+  habitacion: "polygon(3% 0%, 71% 0%, 71% 63%, 3% 63%)",
+
+  // Cocina: Amplia pared focal moderna sobre la zona de comedor y barra de cocina.
+  // Abarca de lado a lado (0% a 100%) desde el techo hasta la superficie del mesón (58%).
+  cocina: "polygon(0% 0%, 100% 0%, 100% 58%, 0% 58%)",
+
+  // Baño: Pared principal de acento sobre la tina exenta y tocador de madera.
+  // Evita el ventanal izquierdo (<21%), la tina (>59%) y el tocador con lavamanos (>54%).
+  bano: "polygon(21% 0%, 100% 0%, 100% 54%, 60% 54%, 60% 59%, 21% 59%)",
+
+  // Oficina: Pared de fondo del estudio de trabajo minimalista.
+  // Despejada de lado a lado (0% a 100%) desde el techo hasta el filo del escritorio (48%).
+  oficina: "polygon(0% 0%, 100% 0%, 100% 48%, 0% 48%)",
+
+  // Fachada: Muros exteriores contemporáneos de la casa.
+  // Sigue fielmente la línea del tejado para no teñir el cielo azul, y la base para no teñir el jardín ni prado.
+  fachada: "polygon(10% 22%, 35% 15%, 60% 21%, 85% 12%, 96% 12%, 96% 67%, 65% 69%, 35% 70%, 10% 70%)",
 };
 
 const PALETA_DEMO: ColorOption[] = [
@@ -156,11 +189,11 @@ export const ColorVisualizer: React.FC<Props> = ({
   const [escena, setEscena] = useState<EscenaVisualizador>("sala");
   const [sliderPct, setSliderPct] = useState(55);
 
-  // Mapa de URLs activas por escena (inicia con las curadas fijas o localStorage)
+  // Mapa de URLs activas por escena (inicia con las curadas fijas o localStorage versionado v2)
   const [fotosEscenas, setFotosEscenas] = useState<Record<EscenaVisualizador, string>>(() => {
     const inicial: Record<string, string> = {};
     (Object.keys(FOTOS_CURADAS_ESCENAS) as EscenaVisualizador[]).forEach((key) => {
-      const enStorage = localStorage.getItem(`colorlink_foto_${key}`);
+      const enStorage = localStorage.getItem(`colorlink_foto_v2_${key}`);
       inicial[key] = enStorage || FOTOS_CURADAS_ESCENAS[key].url;
     });
     return inicial as Record<EscenaVisualizador, string>;
@@ -218,7 +251,7 @@ export const ColorVisualizer: React.FC<Props> = ({
         if (nuevaUrl) {
           setFotosEscenas((prev) => ({ ...prev, [escenaFallida]: nuevaUrl }));
           try {
-            localStorage.setItem(`colorlink_foto_${escenaFallida}`, nuevaUrl);
+            localStorage.setItem(`colorlink_foto_v2_${escenaFallida}`, nuevaUrl);
           } catch {
             // ignore
           }
@@ -312,21 +345,14 @@ export const ColorVisualizer: React.FC<Props> = ({
                   alt={`Espacio ${FOTOS_CURADAS_ESCENAS[escena].label} pintado con ${colorActivo.name}`}
                   className="w-full h-full object-cover"
                 />
-                {/* Capa de color fiel preservando sombras y textura de la pared */}
+                {/* Capa de color fiel aplicada ÚNICAMENTE sobre la pared recortada con polígono a la medida */}
                 <div
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none transition-[background-color] duration-150"
                   style={{
                     backgroundColor: colorActivo.hex,
                     mixBlendMode: "multiply",
-                    opacity: 0.55,
-                    maskImage:
-                      escena === "fachada"
-                        ? "linear-gradient(to bottom, transparent 0%, transparent 12%, black 28%, black 100%)"
-                        : "linear-gradient(to bottom, transparent 0%, black 12%, black 100%)",
-                    WebkitMaskImage:
-                      escena === "fachada"
-                        ? "linear-gradient(to bottom, transparent 0%, transparent 12%, black 28%, black 100%)"
-                        : "linear-gradient(to bottom, transparent 0%, black 12%, black 100%)",
+                    opacity: 0.68,
+                    clipPath: CLIP_PATHS_PARED_ESCENAS[escena],
                   }}
                 />
               </div>

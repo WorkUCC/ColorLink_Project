@@ -26,6 +26,7 @@ export interface SurfaceOption {
   icon: string;
   image: string;
   defaultM2: number;
+  environment?: "interior" | "exterior" | "ambos";
 }
 
 export type ProblemId =
@@ -42,6 +43,7 @@ export interface ProblemOption {
   description: string;
   tag: string;
   severity: "baja" | "media" | "alta";
+  environment?: "interior" | "exterior" | "ambos";
 }
 
 export interface PintucoColor {
@@ -125,6 +127,7 @@ export type PaymentMethod = "tarjeta_credito" | "pse" | "contra_entrega";
 export type OrderTrackingStep =
   | "confirmado"
   | "tinturado_preparacion"
+  | "empacado"
   | "en_camino"
   | "en_sitio_aplicacion"
   | "completado";

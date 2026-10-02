@@ -21,7 +21,7 @@ import {
   DeliveryMethod,
   SurfaceId,
 } from "./types";
-import { PINTUCO_PALETTES, DEMO_PRESETS, CERTIFIED_PAINTERS } from "./data/pintucoData";
+import { PINTUCO_PALETTES, DEMO_PRESETS, CERTIFIED_PAINTERS, getTechnicalRecommendation } from "./data/pintucoData";
 // --- Integración Supabase ---
 import { SupabaseTestPanel } from "./components/SupabaseTestPanel";
 import {
@@ -34,6 +34,8 @@ import {
 import { supabaseConfigurado } from "./lib/supabaseClient";
 import { AdminLoginScreen } from "./components/AdminLoginScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { LoginModal } from "./components/LoginModal";
+import { Loader2, Info, ArrowRight } from "lucide-react";
 
 export default function App() {
   // Step navigation: 1: Login/Account, 2: Need Wizard, 3: Technical Solution, 4: Supply, 5: Service/Tracking, 6: Quality/Warranty
@@ -42,6 +44,9 @@ export default function App() {
 
   // Authenticated user state (null for visitors)
   const [user, setUser] = useState<UserProfile | null>(null);
+
+  // Estado para el modal emergente de inicio de sesión
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
   // Project need state gathered through wizard
   const [projectNeed, setProjectNeed] = useState<ProjectNeedState>({
@@ -77,6 +82,8 @@ export default function App() {
   // AI & technical recommendation state
   const [recommendation, setRecommendation] = useState<TechnicalRecommendation | null>(null);
   const [isDiagnosing, setIsDiagnosing] = useState<boolean>(false);
+  const [hasCompletedWizard, setHasCompletedWizard] = useState<boolean>(false);
+  const [isCheckingDiagnosis, setIsCheckingDiagnosis] = useState<boolean>(false);
 
   // Order & tracking state
   const [orderState, setOrderState] = useState<OrderState>({
@@ -186,53 +193,8 @@ export default function App() {
       }
     } catch (err) {
       console.warn("Backend diagnosis fallback:", err);
-      // Robust client fallback
-      const fallback: TechnicalRecommendation = {
-        productName: "Pintuco Koraza® Doble Vida",
-        productCategory: "Pintura Acrílica de Alta Resistencia Exterior",
-        warrantyYears: 7,
-        systemSteps: [
-          "Paso 1: Lavado y remoción de partes flojas con espátula.",
-          "Paso 2: Aplicación de 1 mano de Sellador Antialcalino Koraza® para neutralizar porosidad.",
-          "Paso 3: Aplicación de 2 manos de Koraza® Doble Vida con intervalo de 3 horas.",
-        ],
-        explanation: `Para tu proyecto de ${needData.areaM2} m² en ${needData.city}, el sistema Koraza® Doble Vida ofrece tecnología hidrorepelente con Bio-Shield que crea una barrera impermeable contra la humedad y rayos UV garantizando durabilidad por 7 años.`,
-        technicalNotes: "Asegurar que la superficie esté completamente seca antes de aplicar el sellador.",
-        benefits: [
-          "100% Acrílica con máxima resistencia a la intemperie",
-          "Tecnología hidrorepelente que repele agua de lluvia",
-          "Antihongos y antialgas activo Bio-Shield",
-          "Alta lavabilidad y retención de color",
-        ],
-        selectedColor: {
-          name: needData.selectedColor.name,
-          hex: needData.selectedColor.hex,
-        },
-        calculation: {
-          areaM2: needData.areaM2,
-          recommendedFormat: "1 Cuñete (5 gal) + 1 Galón",
-          bucketsCount: 1,
-          gallonsCount: 1,
-          totalGallons: 6,
-          litersEstimate: 23,
-          coverageRate: "22 m²/galón a 2 manos",
-          coatCount: 2,
-        },
-        pricing: {
-          currency: "COP",
-          productEstimatedTotal: 479800,
-          laborEstimatedTotal: Math.round(needData.areaM2 * 14500),
-          totalEstimated: 479800 + Math.round(needData.areaM2 * 14500),
-          deliveryFee: 0,
-        },
-        supplyChain: {
-          status: "in_stock",
-          badgeText: "Disponible en Bodega Central y Centro de Tinturado",
-          estimatedDispatchHours: "2 a 4 horas",
-          nearestStore: `Pintacasa Pintuco ${needData.city.split(" ")[0]}`,
-          stockLevel: "Alto (Stock Verificado)",
-        },
-      };
+      // Motor de recomendación oficial Pintuco con filtrado contextual según superficie
+      const fallback = getTechnicalRecommendation(needData, user?.type || "hogar");
       setRecommendation(fallback);
       return fallback;
     } finally {
@@ -254,6 +216,7 @@ export default function App() {
 
   // Handler for completing need wizard
   const handleWizardComplete = async (needData: ProjectNeedState) => {
+    setHasCompletedWizard(true);
     setProjectNeed(needData);
     setCurrentStep(3);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -311,8 +274,8 @@ export default function App() {
   const handleProceedToQuality = async () => {
     const ordenFinal: OrderState = {
       ...orderState,
-      trackingStep: "completado",
-      currentStepIndex: 4,
+      trackingStep: "confirmado",
+      currentStepIndex: 0,
     };
     setOrderState(ordenFinal);
     setCurrentStep(6);
@@ -361,6 +324,7 @@ export default function App() {
     };
     setUser(demoUser);
     setProjectNeed(preset.data);
+    setHasCompletedWizard(true);
     setCurrentStep(3);
     window.scrollTo({ top: 0, behavior: "smooth" });
     fetchTechnicalDiagnosis(preset.data);
@@ -368,6 +332,8 @@ export default function App() {
 
   // Reset flow
   const handleResetApp = () => {
+    setHasCompletedWizard(false);
+    setRecommendation(null);
     setCurrentStep(2);
     setOrderState((prev) => ({
       ...prev,
@@ -378,12 +344,23 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Ensure recommendation exists if user directly navigates to steps 3-6
+  // Step 3 requires a recommendation; generate fallback if navigating directly to Step 3
   useEffect(() => {
-    if (currentStep >= 3 && !recommendation && !isDiagnosing) {
+    if (currentStep === 3 && !recommendation && !isDiagnosing) {
       fetchTechnicalDiagnosis(projectNeed);
     }
   }, [currentStep, recommendation, isDiagnosing, projectNeed]);
+
+  // Steps 4, 5, 6 without a recommendation: show loading check first
+  useEffect(() => {
+    if (currentStep >= 4 && !recommendation && !hasCompletedWizard) {
+      setIsCheckingDiagnosis(true);
+      const timer = setTimeout(() => {
+        setIsCheckingDiagnosis(false);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, recommendation, hasCompletedWizard]);
 
   // Si la URL tiene el parámetro ?admin=1, mostramos la vista administrativa
   if (esAdmin) {
@@ -429,6 +406,7 @@ export default function App() {
         onGoToWarranty={handleGoToWarranty}
         onHighlightHotline={handleHighlightHotline}
         isHotlineHighlighted={isHotlineHighlighted}
+        onOpenLoginModal={() => setIsLoginModalOpen(true)}
       />
 
       {/* Main Flow Views */}
@@ -451,11 +429,11 @@ export default function App() {
         {/* STEP 1: Login / Registration (Optional for visitors, available for registered customers) */}
         {currentStep === 1 && (
           <LoginScreen
-            onLoginSuccess={handleLoginSuccess}
             onContinueAsGuest={() => {
               setCurrentStep(2);
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
             segmentoElegido={segmentoElegido}
             onCambiarSegmento={handleClearSegmento}
           />
@@ -487,8 +465,7 @@ export default function App() {
             onBackToWizard={() => setCurrentStep(2)}
             onRefineWithAI={handleRefineWithAI}
             onLoginClick={() => {
-              setCurrentStep(1);
-              window.scrollTo({ top: 0, behavior: "smooth" });
+              setIsLoginModalOpen(true);
             }}
           />
         )}
@@ -526,6 +503,50 @@ export default function App() {
             onResetApp={handleResetApp}
           />
         )}
+
+        {/* Loader o Estado Vacío Amigable para Pasos 4, 5 o 6 sin recomendación previa */}
+        {currentStep >= 4 && !recommendation && (
+          (isDiagnosing || isCheckingDiagnosis) ? (
+            <div className="max-w-md mx-auto px-4 py-20 text-center">
+              <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#E7E5E4] flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-teal-50 text-[#00A896] flex items-center justify-center mb-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#00A896]" />
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917] mb-1">
+                  Cargando tu diagnóstico...
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Verificando la formulación técnica y el estado de tu proyecto.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto px-4 py-16 text-center">
+              <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#E7E5E4] flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
+                  <Info className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917] mb-1">
+                  Aún no tienes un diagnóstico activo
+                </h3>
+                <p className="text-xs text-stone-500 mb-6 leading-relaxed">
+                  Para consultar el abastecimiento, coordinar el servicio o emitir tu póliza de garantía 360, primero necesitamos conocer la superficie y medidas de tu proyecto.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStep(1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="bg-[#00A896] hover:bg-[#009282] text-white font-semibold text-xs py-2.5 px-5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <span>Comenzar diagnóstico (Paso 1)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )
+        )}
         {/* PANEL DE PRUEBAS: abrir la app con ?pruebas=1 para verlo */}
         {mostrarPanelPruebas && (
           <SupabaseTestPanel projectNeed={projectNeed} recommendation={recommendation} />
@@ -551,6 +572,14 @@ export default function App() {
 
       {/* Floating WhatsApp Support Button */}
       <WhatsAppButton />
+
+      {/* Modal Emergente de Inicio de Sesión / Registro */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+        segmentoElegido={segmentoElegido}
+      />
     </div>
   );
 }

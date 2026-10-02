@@ -18,6 +18,7 @@ import {
   Sparkles,
   MapPin,
   Award,
+  PackageCheck,
 } from "lucide-react";
 import {
   TechnicalRecommendation,
@@ -84,26 +85,33 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
       icon: Paintbrush,
     },
     {
+      id: "empacado",
+      title: "3. Empacado y listo",
+      desc: "Lote verificado, sellado y rotulado con especificaciones técnicas.",
+      icon: PackageCheck,
+    },
+    {
       id: "en_camino",
-      title: "3. En camino al sitio",
+      title: "4. En camino al sitio",
       desc: `Móvil logístico Pintuco y ${selectedPainter.name} en ruta hacia tu dirección.`,
       icon: Truck,
     },
     {
       id: "en_sitio_aplicacion",
-      title: "4. En sitio y aplicación",
+      title: "5. En sitio y aplicación",
       desc: `Preparando superficie y aplicando 2 manos de ${recommendation.productName}.`,
       icon: ShieldCheck,
     },
     {
       id: "completado",
-      title: "5. Servicio completado",
+      title: "6. Servicio completado",
       desc: "Inspección de acabado final y activación de póliza de garantía 360.",
       icon: Award,
     },
   ];
 
-  const currentStepIndex = trackingSteps.findIndex((s) => s.id === orderState.trackingStep);
+  const foundStepIndex = trackingSteps.findIndex((s) => s.id === orderState.trackingStep);
+  const currentStepIndex = foundStepIndex >= 0 ? foundStepIndex : 0;
 
   const handleConfirmOrder = () => {
     setIsOrderConfirmed(true);
@@ -557,7 +565,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
           {/* Stepper Progress */}
           <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {trackingSteps.map((step, idx) => {
                 const Icon = step.icon;
                 const isPassed = currentStepIndex > idx;
@@ -608,8 +616,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                   <line x1="0" y1="200" x2="600" y2="200" stroke="#334155" strokeWidth="14" />
                   <path d="M 50,80 Q 200,120 400,200" fill="none" stroke="#00A896" strokeWidth="6" strokeDasharray="8 6" />
 
-                  {currentStepIndex >= 2 && (
-                    <circle cx={currentStepIndex === 2 ? "260" : "400"} cy={currentStepIndex === 2 ? "140" : "200"} r="10" fill="#00A896">
+                  {currentStepIndex >= 3 && (
+                    <circle cx={currentStepIndex === 3 ? "260" : "400"} cy={currentStepIndex === 3 ? "140" : "200"} r="10" fill="#00A896">
                       <animate attributeName="r" values="8;13;8" dur="1.5s" repeatCount="indefinite" />
                     </circle>
                   )}

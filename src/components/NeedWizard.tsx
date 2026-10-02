@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Home,
   LayoutGrid,
@@ -17,13 +17,16 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  X,
 } from "lucide-react";
-import { ProjectNeedState, SurfaceId, ProblemId, PintucoColor, UserProfile } from "../types";
+import { ProjectNeedState, SurfaceId, ProblemId, PintucoColor, UserProfile, ProblemOption, SurfaceOption } from "../types";
 import {
   SURFACE_OPTIONS,
   PROBLEM_OPTIONS,
   PINTUCO_PALETTES,
   COLOMBIAN_CITIES,
+  getProblemsForSurface,
+  getCoverageM2PerGallon,
 } from "../data/pintucoData";
 import { ColorVisualizer } from "./ColorVisualizer";
 
@@ -71,6 +74,92 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       setWizardStep(initialWizardStep);
     }
   }, [initialWizardStep]);
+
+  // 1. Obtener problemas técnicos filtrados según la superficie (INTERIOR vs EXTERIOR)
+  const problemasFiltrados = useMemo(() => {
+    return getProblemsForSurface(surface);
+  }, [surface]);
+
+  // Si la superficie cambia y el problema actual no pertenece a las opciones válidas, asignar la primera
+  React.useEffect(() => {
+    const validos = getProblemsForSurface(surface);
+    if (!validos.some((p) => p.id === problem)) {
+      setProblem(validos[0]?.id || "humedad_filtraciones");
+    }
+  }, [surface]);
+
+  // 2. Estado para la ventana emergente de confirmación rápida
+  interface ConfirmationData {
+    tipo: "superficie" | "problema" | "color";
+    titulo: string;
+    badge?: string;
+    resumen: string;
+    icono?: React.ReactNode;
+    colorHex?: string;
+    onConfirm: () => void;
+  }
+
+  const [confirmacion, setConfirmacion] = useState<ConfirmationData | null>(null);
+
+  const handleSelectSurface = (item: SurfaceOption) => {
+    setSurface(item.id);
+    const validos = getProblemsForSurface(item.id);
+    if (!validos.some((p) => p.id === problem)) {
+      setProblem(validos[0]?.id || "humedad_filtraciones");
+    }
+
+    const entornoTexto =
+      item.environment === "interior"
+        ? "Ambiente Interior (Paredes, techos y zonas habitables)"
+        : item.environment === "exterior"
+        ? "Ambiente Exterior (Intemperie, sol, lluvia y desgaste)"
+        : "Ambiente Mixto (Interior o Exterior según aplicación)";
+
+    setConfirmacion({
+      tipo: "superficie",
+      titulo: item.title,
+      badge: item.environment === "interior" ? "Interior" : item.environment === "exterior" ? "Exterior" : "Interior / Exterior",
+      resumen: `Clasificación: ${entornoTexto}. El diagnóstico presentará exclusivamente retos técnicos y pinturas compatibles.`,
+      icono: getSurfaceIcon(item.id),
+      onConfirm: () => {
+        setConfirmacion(null);
+        setWizardStep(2);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
+    });
+  };
+
+  const handleSelectProblem = (item: ProblemOption) => {
+    setProblem(item.id);
+    setConfirmacion({
+      tipo: "problema",
+      titulo: item.title,
+      badge: `Severidad ${item.severity}`,
+      resumen: `Tratamiento técnico: ${item.tag}. ${item.description}`,
+      icono: <AlertCircle className="w-5 h-5 text-amber-500" />,
+      onConfirm: () => {
+        setConfirmacion(null);
+        setWizardStep(3);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
+    });
+  };
+
+  const handleSelectColor = (col: PintucoColor) => {
+    setSelectedColor(col);
+    setConfirmacion({
+      tipo: "color",
+      titulo: `${col.name} (${col.code})`,
+      badge: col.collection,
+      colorHex: col.hex,
+      resumen: `${col.description} Tono oficial configurado para simulación arquitectónica y tinturado de fábrica.`,
+      onConfirm: () => {
+        setConfirmacion(null);
+        setWizardStep(5);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
+    });
+  };
 
   // Advanced wall dimensions calculator toggle
   const [showAdvancedCalc, setShowAdvancedCalc] = useState(false);
@@ -228,7 +317,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
             return (
               <div
                 key={item.id}
-                onClick={() => setSurface(item.id)}
+                onClick={() => handleSelectSurface(item)}
                 className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
                   isSelected
                     ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
@@ -259,8 +348,11 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-stone-100 text-[11px] text-stone-400 font-medium">
-                  Área típica: {item.defaultM2} m²
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400 font-medium">
+                  <span>Área típica: {item.defaultM2} m²</span>
+                  <span className="text-[#00A896] font-semibold">
+                    {item.environment === "interior" ? "Interior" : item.environment === "exterior" ? "Exterior" : "Mixto"}
+                  </span>
                 </div>
               </div>
             );
@@ -268,46 +360,73 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
         </div>
       )}
 
-      {/* STEP 2: Problem / Need Selection */}
+      {/* STEP 2: Problem / Need Selection (FILTRADO CONTEXTUAL POR SUPERFICIE) */}
       {wizardStep === 2 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {PROBLEM_OPTIONS.map((item) => {
-            const isSelected = problem === item.id;
-            return (
-              <div
-                key={item.id}
-                onClick={() => setProblem(item.id)}
-                className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
-                  isSelected
-                    ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                    : "border-[#E7E5E4] hover:border-stone-300 bg-white"
-                }`}
-                id={`problem-${item.id}`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-[#00A896] capitalize">
-                      Severidad: {item.severity}
-                    </span>
-                    {isSelected && (
-                      <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
-                    )}
-                  </div>
-                  <h3 className="font-bold text-base text-[#1C1917] mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-stone-500 leading-relaxed mb-3">
-                    {item.description}
-                  </p>
-                </div>
+        <div className="space-y-4">
+          {/* Barra de contexto de superficie activa */}
+          <div className="bg-teal-50/70 border border-[#00A896]/30 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#001D40]">Superficie elegida:</span>
+              <span className="text-[#00A896] font-bold">
+                {SURFACE_OPTIONS.find((s) => s.id === surface)?.title}
+              </span>
+              <span className="text-stone-300">·</span>
+              <span className="text-stone-600 font-medium">
+                {SURFACE_OPTIONS.find((s) => s.id === surface)?.environment === "interior"
+                  ? "Retos técnicos exclusivos para interiores"
+                  : SURFACE_OPTIONS.find((s) => s.id === surface)?.environment === "exterior"
+                  ? "Retos técnicos exclusivos para exteriores e intemperie"
+                  : "Retos técnicos para madera y metales"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setWizardStep(1)}
+              className="text-[#00A896] font-bold hover:underline cursor-pointer"
+            >
+              Cambiar superficie
+            </button>
+          </div>
 
-                <div className="bg-stone-50 rounded-lg p-2.5 text-xs text-stone-600 border border-stone-100">
-                  <span className="font-medium text-stone-800">Tratamiento técnico:</span>{" "}
-                  {item.tag}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {problemasFiltrados.map((item) => {
+              const isSelected = problem === item.id;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectProblem(item)}
+                  className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
+                    isSelected
+                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
+                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                  }`}
+                  id={`problem-${item.id}`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-[#00A896] capitalize">
+                        Severidad: {item.severity}
+                      </span>
+                      {isSelected && (
+                        <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
+                      )}
+                    </div>
+                    <h3 className="font-bold text-base text-[#1C1917] mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-stone-500 leading-relaxed mb-3">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="bg-stone-50 rounded-lg p-2.5 text-xs text-stone-600 border border-stone-100">
+                    <span className="font-medium text-stone-800">Tratamiento técnico:</span>{" "}
+                    {item.tag}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -454,26 +573,41 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
           </div>
 
           {/* Instant Material Yield Preview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
-              <span className="text-xs text-stone-500 font-medium block">Galones estimados (2 manos)</span>
-              <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
-                ~{(areaM2 / 22).toFixed(1)} galones
-              </span>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
-              <span className="text-xs text-stone-500 font-medium block">Presentación óptima</span>
-              <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
-                {areaM2 >= 80 ? "Cuñetes de 5 galones" : "Galones individuales"}
-              </span>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
-              <span className="text-xs text-stone-500 font-medium block">Recomendación técnica</span>
-              <span className="text-lg font-bold text-emerald-700 mt-0.5 block">
-                2 manos cruzadas
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const coverageM2PerGal = getCoverageM2PerGallon(surface, problem);
+            const estGallons = (areaM2 / coverageM2PerGal).toFixed(1);
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                  <span className="text-xs text-stone-500 font-medium block">Galones estimados (2 manos)</span>
+                  <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
+                    ~{estGallons} galones
+                  </span>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    Rendimiento: {coverageM2PerGal} m²/galón
+                  </span>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                  <span className="text-xs text-stone-500 font-medium block">Presentación óptima</span>
+                  <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
+                    {Number(estGallons) >= 4 ? "Cuñetes de 5 galones" : "Galones individuales"}
+                  </span>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    {Number(estGallons) >= 4 ? `~${Math.floor(Number(estGallons) / 5)} cuñete(s)` : "Presentación galón"}
+                  </span>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                  <span className="text-xs text-stone-500 font-medium block">Recomendación técnica</span>
+                  <span className="text-lg font-bold text-emerald-700 mt-0.5 block">
+                    2 manos cruzadas
+                  </span>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    Espesor de película óptimo
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Standard notice */}
           <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
@@ -527,7 +661,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   <button
                     key={color.name}
                     type="button"
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => handleSelectColor(color)}
                     className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896]"
@@ -662,6 +796,79 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Ventana Emergente / Tarjeta de Confirmación Rápida */}
+      {confirmacion && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setConfirmacion(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 relative animate-scaleUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón cerrar X */}
+            <button
+              type="button"
+              onClick={() => setConfirmacion(null)}
+              className="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-full transition cursor-pointer"
+              aria-label="Cerrar confirmación"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Encabezado con icono o muestra de color */}
+            <div className="flex items-center gap-3.5 mb-3.5">
+              {confirmacion.colorHex ? (
+                <div
+                  className="w-12 h-12 rounded-xl border border-black/15 shadow-sm shrink-0"
+                  style={{ backgroundColor: confirmacion.colorHex }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-teal-50 text-[#00A896] border border-teal-100 flex items-center justify-center shrink-0">
+                  {confirmacion.icono || <CheckCircle2 className="w-6 h-6 text-[#00A896]" />}
+                </div>
+              )}
+              <div className="pr-6">
+                {confirmacion.badge && (
+                  <span className="inline-block text-[11px] font-bold text-[#00A896] bg-teal-50 px-2 py-0.5 rounded-md mb-1">
+                    {confirmacion.badge}
+                  </span>
+                )}
+                <h3 className="font-bold text-base text-[#1C1917] leading-tight">
+                  {confirmacion.titulo}
+                </h3>
+              </div>
+            </div>
+
+            {/* Resumen conciso de 1-2 líneas */}
+            <p className="text-xs text-stone-600 leading-relaxed mb-6 bg-stone-50 p-3.5 rounded-xl border border-stone-100">
+              {confirmacion.resumen}
+            </p>
+
+            {/* Botones de acción */}
+            <div className="flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmacion(null)}
+                className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-100 rounded-lg transition cursor-pointer"
+              >
+                Cambiar opción
+              </button>
+              <button
+                type="button"
+                onClick={confirmacion.onConfirm}
+                className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <span>Confirmar y continuar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

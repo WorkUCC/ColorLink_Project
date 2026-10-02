@@ -390,6 +390,7 @@ export async function actualizarInventario(
 export type EstadoPedido =
   | "confirmado"
   | "tinturado_preparacion"
+  | "empacado"
   | "en_camino"
   | "en_sitio_aplicacion"
   | "completado"
