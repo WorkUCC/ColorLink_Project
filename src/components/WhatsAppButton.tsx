@@ -23,12 +23,12 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end print:hidden">
+    <div className="fixed bottom-6 left-6 z-40 flex flex-col items-start print:hidden">
       {/* Interactive flyout panel */}
       {isOpen && (
-        <div className="mb-3 w-80 bg-white rounded-xl shadow-lg border border-[#E7E5E4] overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="mb-3 w-80 bg-[#FBF7F0] rounded-2xl shadow-xl border border-[#E8DFD5] overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
           {/* Header */}
-          <div className="bg-[#001D40] text-white p-4 flex items-center justify-between">
+          <div className="bg-[#1A1715] text-[#FBF7F0] p-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#25D366] text-white flex items-center justify-center font-bold">
                 <svg
@@ -40,8 +40,8 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
                 </svg>
               </div>
               <div>
-                <h4 className="font-bold text-xs text-white">Asesoría Técnica Pintuco</h4>
-                <p className="text-[11px] text-stone-300">Respuesta promedio en minutos</p>
+                <h4 className="font-bold text-xs text-[#FBF7F0]">Asesoría Técnica Pintuco</h4>
+                <p className="text-[11px] text-[#CDBEAF]">Respuesta promedio en minutos</p>
               </div>
             </div>
             <button
@@ -54,22 +54,22 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
           </div>
 
           {/* Body */}
-          <div className="p-4 space-y-3 bg-[#FAFAF9]">
-            <div className="bg-white p-3 rounded-lg border border-[#E7E5E4] text-xs text-stone-700">
+          <div className="p-4 space-y-3 bg-[#F5EFE6]">
+            <div className="bg-white p-3 rounded-xl border border-[#E8DFD5] text-xs text-[#2B211C]">
               <p>
                 Hola, ¿necesitas ayuda con la formulación de tu pintura o dudas sobre tiempos de secado y manos?
               </p>
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+              <label className="block text-[11px] font-semibold text-[#7A6A5D] mb-1">
                 Mensaje a enviar:
               </label>
               <textarea
                 rows={2}
                 value={customMsg}
                 onChange={(e) => setCustomMsg(e.target.value)}
-                className="w-full p-2.5 text-xs bg-white rounded-lg border border-[#E7E5E4] focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                className="w-full p-2.5 text-xs bg-white rounded-xl border border-[#E8DFD5] focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 placeholder="Escribe tu duda técnica..."
               />
             </div>
@@ -86,7 +86,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
                   onClick={() =>
                     setCustomMsg(`¡Hola! Deseo información sobre: ${topic}.`)
                   }
-                  className="text-[10px] bg-white hover:bg-stone-100 text-stone-700 px-2 py-0.5 rounded border border-[#E7E5E4] transition"
+                  className="text-[10px] bg-white hover:bg-[#FAF6F0] text-[#2B211C] px-2 py-0.5 rounded-lg border border-[#E8DFD5] transition"
                 >
                   {topic}
                 </button>

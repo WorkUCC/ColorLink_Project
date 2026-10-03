@@ -57,18 +57,18 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
   if (isLoading) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <div className="bg-white p-10 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E7E5E4] flex flex-col items-center justify-center">
-          <div className="w-14 h-14 rounded-lg bg-[#001D40] text-[#00A896] flex items-center justify-center mb-5">
+        <div className="bg-white p-10 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#E8DFD5] flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-lg bg-[#1A1715] text-[#E2622F] flex items-center justify-center mb-5">
             <Sparkles className="w-7 h-7 animate-pulse" />
           </div>
-          <h2 className="text-xl font-bold text-[#1C1917] mb-2">
+          <h2 className="text-xl font-bold text-[#2B211C] mb-2">
             Formulando recomendación técnica oficial...
           </h2>
           <p className="text-xs text-stone-500 mb-6">
             Evaluando superficie de {projectNeed.surface.replace("_", " ")}, factor de absorción para {projectNeed.areaM2} m² y catálogo de tecnologías Pintuco.
           </p>
           <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-            <div className="bg-[#00A896] h-full w-2/3 rounded-full animate-pulse" />
+            <div className="bg-[#E2622F] h-full w-2/3 rounded-full animate-pulse" />
           </div>
         </div>
       </div>
@@ -78,15 +78,15 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
   if (!recommendation) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <div className="bg-white p-8 rounded-xl border border-[#E7E5E4] shadow-sm">
+        <div className="bg-white p-8 rounded-xl border border-[#E8DFD5] shadow-sm">
           <Info className="w-8 h-8 text-amber-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-[#1C1917]">No se pudo cargar la recomendación</h3>
+          <h3 className="text-base font-bold text-[#2B211C]">No se pudo cargar la recomendación</h3>
           <p className="text-xs text-stone-500 mt-1 mb-6">
             Ocurrió un problema procesando las especificaciones de tu proyecto.
           </p>
           <button
             onClick={onBackToWizard}
-            className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium px-5 py-2.5 rounded-lg text-xs"
+            className="border border-stone-300 hover:bg-stone-50 text-[#1A1715] font-medium px-5 py-2.5 rounded-lg text-xs"
           >
             Volver al asistente
           </button>
@@ -127,11 +127,11 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00A896] mb-1.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E2622F] mb-1.5">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Diagnóstico técnico Pintuco completado</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2B211C]">
             Tu solución técnica recomendada
           </h1>
           <p className="text-sm text-stone-500 mt-1">
@@ -140,7 +140,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
         </div>
 
         {/* Selected Color badge */}
-        <div className="bg-white px-4 py-2.5 rounded-xl border border-[#E7E5E4] shadow-sm flex items-center gap-3 self-start md:self-auto">
+        <div className="bg-white px-4 py-2.5 rounded-xl border border-[#E8DFD5] shadow-sm flex items-center gap-3 self-start md:self-auto">
           <div
             className="w-6 h-6 rounded-lg border border-black/10 shadow-inner"
             style={{ backgroundColor: projectNeed.selectedColor.hex }}
@@ -149,7 +149,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             <span className="text-[10px] text-stone-400 font-semibold uppercase block">
               Color seleccionado
             </span>
-            <span className="text-xs font-bold text-[#1C1917]">
+            <span className="text-xs font-bold text-[#2B211C]">
               {projectNeed.selectedColor.name}
             </span>
           </div>
@@ -181,7 +181,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             <button
               type="button"
               onClick={onLoginClick}
-              className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer shadow-xs"
+              className="bg-[#E2622F] hover:bg-[#C95222] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer shadow-xs"
             >
               Iniciar sesión
             </button>
@@ -193,14 +193,14 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
         {/* Left Column: Hero Product & System Steps */}
         <div className="lg:col-span-8 space-y-6">
           {/* Hero Product Card */}
-          <div className="bg-[#001D40] text-white rounded-xl p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-stone-800">
+          <div className="bg-[#1A1715] text-white rounded-xl p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-stone-800">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <span className="text-xs font-semibold text-[#00A896] bg-[#00A896]/15 px-2.5 py-1 rounded-md">
+              <span className="text-xs font-semibold text-[#E2622F] bg-[#E2622F]/15 px-2.5 py-1 rounded-md">
                 {recommendation.productCategory}
               </span>
 
               <div className="flex items-center gap-1.5 text-xs text-stone-300">
-                <ShieldCheck className="w-4 h-4 text-[#00A896]" />
+                <ShieldCheck className="w-4 h-4 text-[#E2622F]" />
                 <span>{recommendation.warrantyYears} años de garantía certificada</span>
               </div>
             </div>
@@ -216,7 +216,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-4 border-t border-white/10">
               {recommendation.benefits.map((benefit, idx) => (
                 <div key={idx} className="flex items-start gap-2 text-xs text-stone-200">
-                  <CheckCircle2 className="w-4 h-4 text-[#00A896] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E2622F] shrink-0 mt-0.5" />
                   <span>{benefit}</span>
                 </div>
               ))}
@@ -229,9 +229,9 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
           </div>
 
           {/* System Application Steps */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E7E5E4]">
-            <h3 className="text-sm font-bold text-[#1C1917] flex items-center gap-2 mb-4">
-              <Layers className="w-4 h-4 text-[#001D40]" />
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E8DFD5]">
+            <h3 className="text-sm font-bold text-[#2B211C] flex items-center gap-2 mb-4">
+              <Layers className="w-4 h-4 text-[#1A1715]" />
               Secuencia técnica recomendada
             </h3>
 
@@ -241,7 +241,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                   key={idx}
                   className="flex items-start gap-3 p-3.5 rounded-lg bg-stone-50 border border-stone-100"
                 >
-                  <div className="w-6 h-6 rounded-md bg-[#001D40] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-md bg-[#1A1715] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                     {idx + 1}
                   </div>
                   <p className="text-xs text-stone-700 leading-relaxed font-normal">
@@ -262,10 +262,10 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
           </div>
 
           {/* AI Question Box */}
-          <div className="bg-white rounded-xl p-5 border border-[#E7E5E4] shadow-sm">
+          <div className="bg-white rounded-xl p-5 border border-[#E8DFD5] shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-[#00A896]" />
-              <h4 className="text-xs font-semibold text-[#1C1917]">
+              <Sparkles className="w-4 h-4 text-[#E2622F]" />
+              <h4 className="text-xs font-semibold text-[#2B211C]">
                 ¿Tienes alguna duda técnica sobre la superficie o preparación?
               </h4>
             </div>
@@ -275,12 +275,12 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                 value={userQuery}
                 onChange={(e) => setUserQuery(e.target.value)}
                 placeholder="Ej: ¿Debo raspar antes o puedo aplicar sobre pintura vieja?"
-                className="flex-1 px-3.5 py-2 text-xs rounded-lg border border-[#E7E5E4] focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                className="flex-1 px-3.5 py-2 text-xs rounded-lg border border-[#E8DFD5] focus:outline-none focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
               />
               <button
                 type="submit"
                 disabled={isAsking || !userQuery.trim()}
-                className="bg-[#001D40] hover:bg-stone-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                className="bg-[#1A1715] hover:bg-stone-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
               >
                 {isAsking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 <span>Consultar</span>
@@ -291,11 +291,11 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
 
         {/* Right Column: Pricing & Calculation Summary */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E7E5E4]">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E8DFD5]">
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-[#001D40]" />
-                <h3 className="font-bold text-[#1C1917] text-sm">Resumen de materiales</h3>
+                <Package className="w-4 h-4 text-[#1A1715]" />
+                <h3 className="font-bold text-[#2B211C] text-sm">Resumen de materiales</h3>
               </div>
               <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
                 Sin desperdicio
@@ -309,7 +309,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                   <label className="text-xs font-semibold text-stone-700">
                     Número de manos a aplicar
                   </label>
-                  <span className="text-xs font-medium text-[#00A896]">
+                  <span className="text-xs font-medium text-[#E2622F]">
                     {selectedCoats === 2 ? "Estándar oficial" : selectedCoats === 1 ? "Retoque leve" : "Alta cobertura"}
                   </span>
                 </div>
@@ -321,8 +321,8 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                       onClick={() => setSelectedCoats(num)}
                       className={`py-2 px-3 rounded-lg border text-xs font-medium transition cursor-pointer text-center ${
                         selectedCoats === num
-                          ? "bg-[#001D40] text-white border-[#001D40] font-semibold"
-                          : "bg-white text-stone-700 border-[#E7E5E4] hover:bg-stone-50"
+                          ? "bg-[#1A1715] text-white border-[#1A1715] font-semibold"
+                          : "bg-white text-stone-700 border-[#E8DFD5] hover:bg-stone-50"
                       }`}
                     >
                       {num} {num === 1 ? "Mano" : "Manos"}
@@ -333,7 +333,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
 
               <div>
                 <span className="text-xs text-stone-500 block">Presentación requerida</span>
-                <span className="text-base font-bold text-[#1C1917] block mt-0.5 capitalize">
+                <span className="text-base font-bold text-[#2B211C] block mt-0.5 capitalize">
                   {dynamicFormat}
                 </span>
                 <span className="text-xs text-stone-400">
@@ -348,7 +348,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                 </div>
                 <div>
                   <span className="text-stone-500 block">Manos</span>
-                  <span className="font-semibold text-[#00A896]">{selectedCoats} manos</span>
+                  <span className="font-semibold text-[#E2622F]">{selectedCoats} manos</span>
                 </div>
               </div>
             </div>
@@ -381,7 +381,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
                     <button
                       type="button"
                       onClick={onLoginClick}
-                      className="bg-[#00A896] hover:bg-[#009282] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md cursor-pointer transition shadow-xs shrink-0"
+                      className="bg-[#E2622F] hover:bg-[#C95222] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md cursor-pointer transition shadow-xs shrink-0"
                     >
                       Iniciar sesión
                     </button>
@@ -408,12 +408,12 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
 
               <div className="pt-3 border-t border-stone-200 flex items-baseline justify-between">
                 <div>
-                  <span className="text-xs font-bold text-[#1C1917] block">
+                  <span className="text-xs font-bold text-[#2B211C] block">
                     Total estimado
                   </span>
                   <span className="text-[11px] text-stone-400">Pintura + Aplicación</span>
                 </div>
-                <span className="text-xl font-bold text-[#001D40]">
+                <span className="text-xl font-bold text-[#1A1715]">
                   ${finalTotalPrice.toLocaleString("es-CO")}
                 </span>
               </div>
@@ -422,7 +422,7 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             <button
               type="button"
               onClick={onProceedToSupply}
-              className="w-full mt-6 bg-[#00A896] hover:bg-[#009282] text-white font-medium py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm"
+              className="w-full mt-6 bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"
               id="btn-proceed-supply"
             >
               <span>Verificar disponibilidad y entrega</span>
@@ -430,8 +430,8 @@ export const TechnicalSolution: React.FC<TechnicalSolutionProps> = ({
             </button>
           </div>
 
-          <div className="p-4 bg-white rounded-xl border border-[#E7E5E4] flex items-center gap-3 text-xs text-stone-600 shadow-sm">
-            <Truck className="w-5 h-5 text-[#00A896] shrink-0" />
+          <div className="p-4 bg-white rounded-xl border border-[#E8DFD5] flex items-center gap-3 text-xs text-stone-600 shadow-sm">
+            <Truck className="w-5 h-5 text-[#E2622F] shrink-0" />
             <span>
               Tinturado y despacho desde tiendas autorizadas en {projectNeed.city}.
             </span>

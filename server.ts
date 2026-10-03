@@ -230,7 +230,7 @@ Devuelve tu respuesta en formato JSON estructurado con las siguientes claves:
 }`;
 
         const aiResponse = await ai.models.generateContent({
-          model: "gemini-3.7-flash",
+          model: "gemini-3.8-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -301,6 +301,145 @@ Devuelve tu respuesta en formato JSON estructurado con las siguientes claves:
     res.status(500).json({
       success: false,
       error: "Error processing recommendation",
+    });
+  }
+});
+
+// API: Asesora Técnica Virtual Sofía (Respuestas reales con IA para Pintuco ColorLink)
+app.post("/api/advisor/chat", async (req: Request, res: Response) => {
+  try {
+    const { question, surface, problem, areaM2, selectedColor, currentStep, history } = req.body;
+
+    if (!question || typeof question !== "string" || !question.trim()) {
+      return res.status(400).json({ success: false, error: "La pregunta no puede estar vacía" });
+    }
+
+    const trimmedQuestion = question.trim();
+
+    // Contexto de proyecto
+    const contextInfo = `
+- Superficie actual del proyecto: ${surface || "Paredes interiores"}
+- Reto técnico identificado: ${problem || "Condición general"}
+- Área del proyecto: ${areaM2 || 45} m²
+- Color seleccionado: ${selectedColor?.name || "Blanco"} (${selectedColor?.code || "Base"})
+- Paso actual del flujo: Paso ${currentStep || 2} de 6 en ColorLink Pintuco
+`;
+
+    let advisorAnswer = "";
+
+    // 1. Intentar responder con Gemini 3.8 Flash si la API Key está configurada
+    if (ai) {
+      try {
+        const systemInstruction = `Eres Sofía, Ingeniera de Aplicación y Asesora Técnica Oficial de Pintuco Colombia para la plataforma digital ColorLink.
+Tu misión principal es responder de manera DIRECTA, PRECISA, CÁLIDA Y TÉCNICAMENTE RIGUROSA a la pregunta del usuario.
+
+REGLAS FUNDAMENTALES:
+1. RESPONDE EXACTAMENTE A LO QUE SE TE PREGUNTA. No te limites a repetir la superficie o reto del cliente. Si pregunta por dilución, explica proporciones y solvente; si pregunta por herramientas, recomienda rodillos/brochas específicos; si pregunta por precios o formatos (galón vs cuñete), explícalo claramente; si pregunta por secado, manos o cielo raso, dale la respuesta concreta.
+2. Si la duda es técnica o constructiva (humedad, filtración, grietas, estuco, sellador, metales oxidados, maderas, techos, impermeabilización), proporciona una solución paso a paso con productos Pintuco (Viniltex, Koraza, Aquaprotec, Pintulux, Madex, Sellomax, etc.).
+3. Sé concisa y agradable (1 a 3 párrafos cortos o viñetas fáciles de leer en pantalla de celular).
+4. Usa un tono cercano y profesional en español colombiano neutral (puedes tratar de "tú").
+5. Si preguntan algo totalmente ajeno a pintura o construcción, responde con humor amable y reorienta la charla hacia la pintura de su espacio.`;
+
+        // Construir historial de conversación si existe
+        let conversationPrompt = `Contexto del proyecto del cliente:${contextInfo}\n\n`;
+        if (Array.isArray(history) && history.length > 0) {
+          conversationPrompt += "Historial previo de la conversación:\n";
+          history.slice(-4).forEach((h: { sender: string; text: string }) => {
+            conversationPrompt += `${h.sender === "user" ? "Cliente" : "Sofía"}: ${h.text}\n`;
+          });
+          conversationPrompt += "\n";
+        }
+        conversationPrompt += `Pregunta actual del cliente: "${trimmedQuestion}"\n\nResponde como Sofía directamente a esta pregunta:`;
+
+        const aiResponse = await ai.models.generateContent({
+          model: "gemini-3.8-flash",
+          contents: conversationPrompt,
+          config: {
+            systemInstruction,
+            temperature: 0.6,
+          },
+        });
+
+        if (aiResponse.text) {
+          advisorAnswer = aiResponse.text.trim();
+        }
+      } catch (err) {
+        console.warn("[Sofía Advisor] Error en llamada a Gemini, usando motor de conocimiento técnico de respaldo:", err);
+      }
+    }
+
+    // 2. Motor de respaldo de conocimiento técnico especializado de Pintuco
+    if (!advisorAnswer) {
+      const q = trimmedQuestion.toLowerCase();
+
+      if (q.includes("dilu") || q.includes("agua") || q.includes("thinner") || q.includes("disolv") || q.includes("mezcl")) {
+        advisorAnswer = `Para las pinturas vinílicas de Pintuco (como Viniltex y Koraza), la dilución recomendada es con **agua potable limpia**:
+• Para aplicación con brocha o rodillo: agrega máximo un **10% a 15% de agua** (aproximadamente 1 vaso de agua por galón).
+• Para aplicación con pistola o Airless: puedes diluir hasta un **20% de agua**.
+⚠️ **Importante:** Nunca diluyas de más, ya que reducirías el espesor de película protectora y el poder cubriente. En esmaltes como Pintulux 3 en 1, no requiere thinner si aplicas con brocha, o usa Thinner Pintuco si usas pistola.`;
+      } else if (q.includes("cielo") || q.includes("techo") || q.includes("raso") || q.includes("drywall") || q.includes("yeso")) {
+        advisorAnswer = `Para cielos rasos y placas de drywall o yeso, la clave está en el **acabado mate**:
+1. Usa **Viniltex Techos o Viniltex Antirreflejo Blanco**: al ser completamente mate, disimula imperfecciones, uniones de cinta y masilla que la luz rasante suele evidenciar.
+2. Si el cielo raso es de baño o cocina con vapor, aplica **Aquaprotec Baños y Cocinas**, que cuenta con fungicida activo contra el moho negro por condensación.
+3. Se recomienda aplicar primero en los bordes con brocha y luego rodillar en una sola dirección con rodillo de felpa corta (3/8").`;
+      } else if (q.includes("precio") || q.includes("cuesta") || q.includes("valor") || q.includes("cuanto vale") || q.includes("cuánto vale") || q.includes("cuñete") || q.includes("galon") || q.includes("galón")) {
+        advisorAnswer = `Los precios de referencia oficiales en ColorLink Pintuco son:
+• **Galón (3.785 L):** Rinde entre 20 y 28 m² a 2 manos. Precios desde $67.900 (Viniltex) hasta $89.900 (Koraza Doble Vida).
+• **Cuñete (5 galones = 18.9 L):** Es la presentación más económica para obras medianas y grandes, con un **ahorro de más del 15% por galón** (desde $295.000 a $389.900).
+En el Paso 3 del cotizador puedes ver el desglose exacto de materiales y mano de obra para los ${areaM2 || 45} m² de tu espacio.`;
+      } else if (q.includes("lluv") || q.includes("humed") || q.includes("clima") || q.includes("mojad") || q.includes("filtr")) {
+        advisorAnswer = `¡Cuidado con el clima y la humedad! 
+• **Si va a llover o hay humedad alta (>85%):** No pintes exteriores. La película de pintura acrílica necesita al menos 3 a 4 horas libres de lluvia para secar adecuadamente y anclarse.
+• **Si la pared ya tiene humedad:** Primero debes identificar el origen (filtración de tubería, freático o cubierta). Raspa la pintura dañada, deja secar el muro y aplica **Sellomax Antihumedad** antes del color de acabado.`;
+      } else if (q.includes("mano") || q.includes("capa") || q.includes("cuantas") || q.includes("cuántas")) {
+        advisorAnswer = `Para cualquier línea arquitectónica de Pintuco siempre se deben aplicar **2 manos cruzadas**:
+• La 1ra mano sella el sustrato y crea el puente de adherencia.
+• La 2da mano proporciona la resistencia lavable, la homogeneidad del tono y el espesor de garantía.
+Deja secar entre 2 y 3 horas entre la primera y la segunda mano para obtener el acabado perfecto.`;
+      } else if (q.includes("secad") || q.includes("secar") || q.includes("hora") || q.includes("tiempo")) {
+        advisorAnswer = `Tiempos de secado con productos base agua Pintuco a temperatura ambiente (20°C - 25°C):
+• **Secado al tacto:** 30 a 45 minutos.
+• **Segunda mano (repintado):** 2 a 3 horas.
+• **Lavabilidad y curado total:** 7 a 14 días. Durante la primera semana no limpies la pared con esponjas ni detergentes fuertes.`;
+      } else if (q.includes("herramienta") || q.includes("rodillo") || q.includes("brocha") || q.includes("aplicar")) {
+        advisorAnswer = `Herramientas recomendadas según tu espacio:
+• **Paredes lisas o estucadas:** Rodillo de microfibra o felpa corta de 3/8" (no salpica y deja textura lisa).
+• **Fachadas o superficies rústicas:** Rodillo de lana o felpa larga de 3/4" para penetrar los poros del revoque.
+• **Bordes y esquinas:** Brocha de cerda sintética en ángulo de 2" o 2.5".
+• **Bandeja plástica:** Para escurrir el exceso y evitar gotas indeseadas.`;
+      } else if (q.includes("lija") || q.includes("prepar") || q.includes("estuco") || q.includes("limpi")) {
+        advisorAnswer = `El protocolo de preparación Pintuco para un acabado profesional:
+1. **Limpieza:** Elimina polvo y grasa con agua y jabón suave.
+2. **Lijado:** Si la pared tenía pintura brillante, lija con grano 180 o 220 para abrir poro.
+3. **Resanes:** Tapa huecos y fisuras con Estuco Acrílico Pintuco.
+4. **Sellado:** Si la masilla o estuco es nuevo, aplica 1 mano de sellador para que la pintura no se absorba de forma dispareja.`;
+      } else if (q.includes("garantia") || q.includes("garantía") || q.includes("poliza") || q.includes("póliza")) {
+        advisorAnswer = `Nuestra **Garantía Pintuco 360** te otorga entre 3 y 7 años de respaldo oficial según la línea seleccionada (ej. Koraza 7 años, Viniltex 5 años).
+Cubre:
+• Calidad fisicoquímica (no descascaramiento ni caleo prematuro).
+• Solidez de pigmento contra decoloración por luz UV.
+• Certificación de aplicación si eliges uno de nuestros maestros certificados en el Paso 5.`;
+      } else if (q.includes("olor") || q.includes("ecol") || q.includes("voc") || q.includes("toxic")) {
+        advisorAnswer = `Tanto **Viniltex Avanzada** como **Koraza** están formuladas con **Cero VOC y Bajo Olor**. Esto significa que puedes pintar espacios habitados (como dormitorios, salas de bebés o consultorios) sin generar olores molestos ni vapores tóxicos, permitiendo ocupar la habitación el mismo día.`;
+      } else {
+        // Respuesta técnica directa contextualizada a la consulta
+        advisorAnswer = `Respecto a "${trimmedQuestion}": 
+En Pintuco recomendamos verificar primero que la superficie esté completamente seca y libre de grasitud o polvo. Para el área de ${areaM2 || 45} m² que estás cotizando, el sistema formulado garantiza una adherencia superior y resistencia al lavado. 
+
+Si requieres una evaluación técnica presencial en tu obra o asesoría para un caso muy específico, nuestro equipo de ingenieros está disponible en la línea gratuita nacional **01 8000 111 404** o mediante nuestro chat de WhatsApp. ¿Deseas que te oriente sobre algún paso de la preparación o aplicación?`;
+      }
+    }
+
+    return res.json({
+      success: true,
+      answer: advisorAnswer,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    });
+  } catch (error) {
+    console.error("Advisor chat error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error procesando la consulta con la asesora virtual",
     });
   }
 });

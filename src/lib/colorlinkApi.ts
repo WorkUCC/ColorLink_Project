@@ -25,14 +25,181 @@ export async function obtenerProductos() {
   return data;
 }
 
-export async function obtenerTiendas(ciudad?: string) {
-  let query = supabase
-    .from("tienda")
-    .select("id_tienda, nombre, ciudad, direccion, telefono, stock_disponible");
-  if (ciudad) query = query.eq("ciudad", ciudad);
-  const { data, error } = await query.order("nombre");
-  if (error) throw error;
-  return data;
+export interface TiendaDB {
+  id_tienda: number;
+  nombre: string;
+  ciudad: string;
+  direccion: string;
+  telefono: string;
+  stock_disponible?: boolean;
+  latitud?: number | null;
+  longitud?: number | null;
+}
+
+export const TIENDAS_FALLBACK: TiendaDB[] = [
+  {
+    id_tienda: 1,
+    nombre: "Tienda Pintacasa Pintuco - Calle 80",
+    ciudad: "Bogotá D.C.",
+    direccion: "Calle 80 # 69-45, Ferias",
+    telefono: "(601) 320 9000",
+    stock_disponible: true,
+    latitud: 4.6896,
+    longitud: -74.0862,
+  },
+  {
+    id_tienda: 2,
+    nombre: "Centro de Experiencia Pintuco - Calle 134",
+    ciudad: "Bogotá D.C.",
+    direccion: "Av. Calle 134 # 19-32, Cedritos",
+    telefono: "(601) 320 9001",
+    stock_disponible: true,
+    latitud: 4.7175,
+    longitud: -74.0436,
+  },
+  {
+    id_tienda: 3,
+    nombre: "Tienda Pintacasa Pintuco - Guayabal",
+    ciudad: "Medellín (Antioquia)",
+    direccion: "Cra. 52 # 10-70, Guayabal",
+    telefono: "(604) 444 8000",
+    stock_disponible: true,
+    latitud: 6.2163,
+    longitud: -75.5861,
+  },
+  {
+    id_tienda: 4,
+    nombre: "Pintuco Store - Poblado Calle 10",
+    ciudad: "Medellín (Antioquia)",
+    direccion: "Calle 10 # 43D-21, El Poblado",
+    telefono: "(604) 444 8002",
+    stock_disponible: true,
+    latitud: 6.2094,
+    longitud: -75.5709,
+  },
+  {
+    id_tienda: 5,
+    nombre: "Tienda Pintacasa Pintuco - Pasoancho",
+    ciudad: "Cali (Valle)",
+    direccion: "Calle 13 # 66-10, Pasoancho",
+    telefono: "(602) 330 4000",
+    stock_disponible: true,
+    latitud: 3.4082,
+    longitud: -76.5412,
+  },
+  {
+    id_tienda: 6,
+    nombre: "Centro de Pinturas Pintuco - Norte",
+    ciudad: "Barranquilla (Atlántico)",
+    direccion: "Cra. 53 # 79-120, Alto Prado",
+    telefono: "(605) 385 6000",
+    stock_disponible: true,
+    latitud: 11.0041,
+    longitud: -74.8069,
+  },
+  {
+    id_tienda: 7,
+    nombre: "Tienda Pintuco Cabecera",
+    ciudad: "Bucaramanga (Santander)",
+    direccion: "Cra. 33 # 48-112, Cabecera",
+    telefono: "(607) 643 8900",
+    stock_disponible: true,
+    latitud: 7.1192,
+    longitud: -73.1095,
+  },
+  {
+    id_tienda: 8,
+    nombre: "Pintuco Store - Bocagrande",
+    ciudad: "Cartagena (Bolívar)",
+    direccion: "Cra. 3 # 8-45, Bocagrande",
+    telefono: "(605) 665 4200",
+    stock_disponible: true,
+    latitud: 10.4042,
+    longitud: -75.5539,
+  },
+  {
+    id_tienda: 9,
+    nombre: "Tienda Pintuco Circunvalar",
+    ciudad: "Pereira (Risaralda)",
+    direccion: "Av. Circunvalar # 12-30, Los Alpes",
+    telefono: "(606) 324 7000",
+    stock_disponible: true,
+    latitud: 4.8115,
+    longitud: -75.6908,
+  },
+  {
+    id_tienda: 10,
+    nombre: "Tienda Pintuco Manizales Centro",
+    ciudad: "Manizales (Caldas)",
+    direccion: "Cra. 22 # 25-18, Centro",
+    telefono: "(606) 884 5500",
+    stock_disponible: true,
+    latitud: 5.0689,
+    longitud: -75.5174,
+  },
+  {
+    id_tienda: 11,
+    nombre: "Tienda Pintuco Ibagué Quinta",
+    ciudad: "Ibagué (Tolima)",
+    direccion: "Cra. 5 # 37-20, La Pola",
+    telefono: "(608) 261 3300",
+    stock_disponible: true,
+    latitud: 4.4389,
+    longitud: -75.2322,
+  },
+  {
+    id_tienda: 12,
+    nombre: "Pintuco Store Santa Marta El Rodadero",
+    ciudad: "Santa Marta (Magdalena)",
+    direccion: "Cra. 2 # 9-40, El Rodadero",
+    telefono: "(605) 422 9900",
+    stock_disponible: true,
+    latitud: 11.2062,
+    longitud: -74.2255,
+  },
+];
+
+export async function obtenerTiendas(ciudad?: string): Promise<TiendaDB[]> {
+  try {
+    let query = supabase
+      .from("tienda")
+      .select("id_tienda, nombre, ciudad, direccion, telefono, stock_disponible, latitud, longitud");
+    if (ciudad) query = query.eq("ciudad", ciudad);
+    const { data, error } = await query.order("nombre");
+    if (error) {
+      console.warn("[colorlinkApi] Fallback al catálogo de tiendas:", error.message);
+      return obtenerTiendasFallback(ciudad);
+    }
+    if (data && data.length > 0) {
+      // Si alguna tienda vino sin lat/lng, completar con fallback si coincide
+      return data.map((t: any) => {
+        if (!t.latitud || !t.longitud) {
+          const match = TIENDAS_FALLBACK.find(
+            (fb) => fb.nombre.toLowerCase() === t.nombre?.toLowerCase() || fb.ciudad.toLowerCase().includes(t.ciudad?.toLowerCase())
+          );
+          return {
+            ...t,
+            latitud: t.latitud || match?.latitud || 4.6782,
+            longitud: t.longitud || match?.longitud || -74.0583,
+          };
+        }
+        return t;
+      }) as TiendaDB[];
+    }
+    return obtenerTiendasFallback(ciudad);
+  } catch (err) {
+    console.warn("[colorlinkApi] Error consultando tiendas:", err);
+    return obtenerTiendasFallback(ciudad);
+  }
+}
+
+export function obtenerTiendasFallback(ciudad?: string): TiendaDB[] {
+  if (!ciudad) return TIENDAS_FALLBACK;
+  const ciudadLimpia = ciudad.split("(")[0].trim().toLowerCase();
+  const match = TIENDAS_FALLBACK.filter((t) =>
+    t.ciudad.toLowerCase().includes(ciudadLimpia)
+  );
+  return match.length > 0 ? match : TIENDAS_FALLBACK;
 }
 
 export async function obtenerMaestros(ciudad?: string) {

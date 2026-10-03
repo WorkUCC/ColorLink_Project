@@ -35,6 +35,7 @@ import { supabaseConfigurado } from "./lib/supabaseClient";
 import { AdminLoginScreen } from "./components/AdminLoginScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { LoginModal } from "./components/LoginModal";
+import { VirtualAdvisor } from "./components/VirtualAdvisor";
 import { Loader2, Info, ArrowRight } from "lucide-react";
 
 export default function App() {
@@ -210,8 +211,16 @@ export default function App() {
       city: prev.city || profile.city,
       address: prev.address || profile.address,
     }));
-    setCurrentStep((prevStep) => (prevStep === 1 ? 2 : prevStep));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setCurrentStep((prevStep) => {
+      if (prevStep === 1) {
+        setTimeout(() => {
+          const wizardEl = document.getElementById("wizard-container");
+          if (wizardEl) wizardEl.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+        return 2;
+      }
+      return prevStep;
+    });
   };
 
   // Handler for completing need wizard
@@ -365,7 +374,7 @@ export default function App() {
   // Si la URL tiene el parámetro ?admin=1, mostramos la vista administrativa
   if (esAdmin) {
     return (
-      <div className="min-h-screen bg-slate-100 text-slate-900 font-sans selection:bg-[#00A896] selection:text-white">
+      <div className="min-h-screen bg-[#FBF7F0] text-[#2B211C] font-sans selection:bg-[#E2622F] selection:text-[#FBF7F0]">
         {!adminAutenticado ? (
           <AdminLoginScreen onLoginExitoso={(admin) => setAdminAutenticado(admin)} />
         ) : (
@@ -382,7 +391,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-[#1C1917] flex flex-col font-sans selection:bg-[#00A896] selection:text-white">
+    <div className="min-h-screen bg-[#FBF7F0] text-[#2B211C] flex flex-col font-sans selection:bg-[#E2622F] selection:text-[#FBF7F0]">
       {/* Global Brand Header */}
       <Header
         currentStep={currentStep}
@@ -431,7 +440,12 @@ export default function App() {
           <LoginScreen
             onContinueAsGuest={() => {
               setCurrentStep(2);
-              window.scrollTo({ top: 0, behavior: "smooth" });
+              setTimeout(() => {
+                const wizardEl = document.getElementById("wizard-container");
+                if (wizardEl) {
+                  wizardEl.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 50);
             }}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
             segmentoElegido={segmentoElegido}
@@ -508,14 +522,14 @@ export default function App() {
         {currentStep >= 4 && !recommendation && (
           (isDiagnosing || isCheckingDiagnosis) ? (
             <div className="max-w-md mx-auto px-4 py-20 text-center">
-              <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#E7E5E4] flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-xl bg-teal-50 text-[#00A896] flex items-center justify-center mb-4">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#00A896]" />
+              <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#E8DFD5] flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-[#F5EFE6] text-[#E2622F] flex items-center justify-center mb-4 border border-[#E8DFD5]">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#E2622F]" />
                 </div>
-                <h3 className="text-base font-bold text-[#1C1917] mb-1">
+                <h3 className="text-base font-bold text-[#2B211C] mb-1">
                   Cargando tu diagnóstico...
                 </h3>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-[#7A6A5D]">
                   Verificando la formulación técnica y el estado de tu proyecto.
                 </p>
               </div>
@@ -538,7 +552,7 @@ export default function App() {
                     setCurrentStep(1);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="bg-[#00A896] hover:bg-[#009282] text-white font-semibold text-xs py-2.5 px-5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer shadow-sm"
+                  className="bg-[#E2622F] hover:bg-[#C95222] text-[#FBF7F0] font-semibold text-xs py-2.5 px-5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer shadow-sm"
                 >
                   <span>Comenzar diagnóstico (Paso 1)</span>
                   <ArrowRight className="w-4 h-4" />
@@ -554,15 +568,15 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#001D40] text-stone-300 py-6 border-t border-stone-800 text-xs">
+      <footer className="bg-[#1A1715] text-[#CDBEAF] py-6 border-t border-[#2B211C] text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white">ColorLink by Pintuco</span>
-            <span className="text-stone-500">|</span>
-            <span className="text-stone-300">Solución técnica, abastecimiento y garantía oficial</span>
+            <span className="font-bold text-[#FBF7F0]">ColorLink by Pintuco</span>
+            <span className="text-[#7A6A5D]">|</span>
+            <span className="text-[#CDBEAF]">Solución técnica, abastecimiento y garantía oficial</span>
           </div>
 
-          <div className="flex items-center gap-4 text-stone-400">
+          <div className="flex items-center gap-4 text-[#CDBEAF]">
             <span>+80 años protegiendo a Colombia</span>
             <span>•</span>
             <a href="tel:018000111404" className="hover:text-white transition">Línea Técnica: 018000 111 404</a>
@@ -572,6 +586,14 @@ export default function App() {
 
       {/* Floating WhatsApp Support Button */}
       <WhatsAppButton />
+
+      {/* Asesora Técnica Virtual con Avatar Pintuco */}
+      <VirtualAdvisor
+        currentStep={currentStep}
+        projectNeed={projectNeed}
+        recommendation={recommendation}
+        user={user}
+      />
 
       {/* Modal Emergente de Inicio de Sesión / Registro */}
       <LoginModal

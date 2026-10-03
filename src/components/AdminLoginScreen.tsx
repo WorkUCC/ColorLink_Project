@@ -39,9 +39,9 @@ export const AdminLoginScreen: React.FC<Props> = ({ onLoginExitoso }) => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="bg-[#001D40] text-white px-6 py-8 flex flex-col items-center gap-3 text-center">
-            <div className="w-14 h-14 rounded-full bg-[#00A896]/20 flex items-center justify-center">
-              <ShieldCheck className="w-7 h-7 text-[#00A896]" />
+          <div className="bg-[#1A1715] text-white px-6 py-8 flex flex-col items-center gap-3 text-center">
+            <div className="w-14 h-14 rounded-full bg-[#E2622F]/20 flex items-center justify-center">
+              <ShieldCheck className="w-7 h-7 text-[#E2622F]" />
             </div>
             <h1 className="text-xl font-bold">Panel de Administrador</h1>
             <p className="text-blue-200 text-sm">ColorLink by Pintuco</p>
@@ -58,7 +58,7 @@ export const AdminLoginScreen: React.FC<Props> = ({ onLoginExitoso }) => {
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
                 placeholder="admin@pintuco.com"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A896]"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E2622F]"
               />
             </div>
 
@@ -72,7 +72,7 @@ export const AdminLoginScreen: React.FC<Props> = ({ onLoginExitoso }) => {
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00A896]"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E2622F]"
               />
             </div>
 
@@ -86,7 +86,7 @@ export const AdminLoginScreen: React.FC<Props> = ({ onLoginExitoso }) => {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full inline-flex items-center justify-center gap-2 bg-[#00A896] hover:bg-[#008577] disabled:opacity-50 text-white font-semibold px-5 py-3 rounded-xl transition"
+              className="w-full inline-flex items-center justify-center gap-2 bg-[#E2622F] hover:bg-[#C95222] disabled:opacity-50 text-white font-semibold px-5 py-3 rounded-xl transition"
             >
               {cargando ? (
                 <>
@@ -99,7 +99,13 @@ export const AdminLoginScreen: React.FC<Props> = ({ onLoginExitoso }) => {
           </form>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-4">
+        <div className="mt-4 p-3 rounded-xl bg-slate-100 border border-slate-200 text-center">
+          <p className="text-xs text-slate-600">
+            Acceso de prueba: <span className="font-mono font-semibold text-slate-800">admin@pintuco.com</span> / <span className="font-mono font-semibold text-slate-800">pintuco2026</span>
+          </p>
+        </div>
+
+        <p className="text-center text-xs text-slate-400 mt-3">
           Acceso restringido — solo personal autorizado de Pintuco.
         </p>
       </div>

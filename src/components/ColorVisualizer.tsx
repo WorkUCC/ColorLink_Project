@@ -24,9 +24,15 @@ import {
 } from "lucide-react";
 
 import designerLivingImg from "../assets/images/designer_livingroom_1790412952964.jpg";
-import facadeArchImg from "../assets/images/facade_architecture_1790412935369.jpg";
+import bedroomImg from "../assets/images/bedroom_minimal_6580214.jpg";
+import kitchenLuxuryImg from "../assets/images/kitchen_luxury_1791046677953.jpg";
+import kitchenRedImg from "../assets/images/kitchen_red_1791046691366.jpg";
+import kitchenBlueImg from "../assets/images/kitchen_blue_1791046706644.jpg";
+import kitchenGreenImg from "../assets/images/kitchen_green_1791046719015.jpg";
+import kitchenYellowImg from "../assets/images/kitchen_yellow_1791046731474.jpg";
 import luxuryBathroomImg from "../assets/images/luxury_bathroom_1790413117503.jpg";
-import credenzaVaseImg from "../assets/images/credenza_vase_1790413140726.jpg";
+import officeImg from "../assets/images/office_minimal_10567351.jpg";
+import facadeArchImg from "../assets/images/facade_minimal_20295564.jpg";
 
 export interface ColorOption {
   name: string;
@@ -47,37 +53,152 @@ export interface EscenaConfig {
   query: string;
   label: string;
   icon: React.ReactNode;
+  aspectRatio: string;
+  grupo: "interiores" | "exteriores";
+  photographer?: string;
+}
+
+/**
+ * Resuelve la renderización hiperrealista de la cocina según el color seleccionado:
+ * - Si piden rojo -> se cambia a rojo (kitchenRedImg)
+ * - Si piden azul -> se cambia a azul (kitchenBlueImg)
+ * - Si piden verde -> se cambia a verde oliva / menta (kitchenGreenImg)
+ * - Si piden amarillo -> se cambia a amarillo ocre (kitchenYellowImg)
+ * - Si piden blanco / crema / neutro -> se cambia a neutro (kitchenLuxuryImg)
+ * Para tonos personalizados, combina la base más cercana con ajuste de color.
+ */
+export function resolverFotoCocinaPorColor(color: ColorOption): {
+  fotoDespues: string;
+  requiereOverlayCustom: boolean;
+  tonalidadDetectada: "rojo" | "azul" | "verde" | "amarillo" | "blanco";
+} {
+  const name = (color.name || "").toLowerCase();
+  const hex = (color.hex || "").toLowerCase();
+
+  // 1. Rojo / Vino Tinto / Terracota
+  if (
+    name.includes("rojo") ||
+    name.includes("vino") ||
+    name.includes("tinto") ||
+    name.includes("terracota") ||
+    hex === "#7a3b4e" ||
+    hex === "#c67b5c" ||
+    hex === "#a6192e"
+  ) {
+    return { fotoDespues: kitchenRedImg, requiereOverlayCustom: false, tonalidadDetectada: "rojo" };
+  }
+
+  // 2. Azul / Azul Grisáceo / Celeste / Petróleo
+  if (
+    name.includes("azul") ||
+    name.includes("celeste") ||
+    name.includes("navy") ||
+    hex === "#7c93a3" ||
+    hex.startsWith("#0f") ||
+    hex.startsWith("#1c") ||
+    hex.startsWith("#2b4") ||
+    hex.startsWith("#3b6")
+  ) {
+    return { fotoDespues: kitchenBlueImg, requiereOverlayCustom: false, tonalidadDetectada: "azul" };
+  }
+
+  // 3. Verde / Verde Oliva / Menta / Salvia
+  if (
+    name.includes("verde") ||
+    name.includes("oliva") ||
+    name.includes("menta") ||
+    name.includes("salvia") ||
+    hex === "#8a9a7b" ||
+    hex.startsWith("#88c") ||
+    hex.startsWith("#6b7") ||
+    hex.startsWith("#4d5")
+  ) {
+    return { fotoDespues: kitchenGreenImg, requiereOverlayCustom: false, tonalidadDetectada: "verde" };
+  }
+
+  // 4. Amarillo / Ocre / Mostaza / Cálido
+  if (
+    name.includes("amarillo") ||
+    name.includes("ocre") ||
+    name.includes("mostaza") ||
+    hex === "#d9b65c" ||
+    hex.startsWith("#d89") ||
+    hex.startsWith("#e5b") ||
+    hex.startsWith("#f4c")
+  ) {
+    return { fotoDespues: kitchenYellowImg, requiereOverlayCustom: false, tonalidadDetectada: "amarillo" };
+  }
+
+  // 5. Blanco / Arena / Neutro
+  if (
+    name.includes("blanco") ||
+    name.includes("nube") ||
+    name.includes("arena") ||
+    name.includes("marfil") ||
+    hex === "#f5f3ee" ||
+    hex === "#d8c9a3" ||
+    hex.startsWith("#f")
+  ) {
+    return { fotoDespues: kitchenLuxuryImg, requiereOverlayCustom: false, tonalidadDetectada: "blanco" };
+  }
+
+  // Fallback por análisis RGB para colores arbitrarios
+  try {
+    const r = parseInt(hex.slice(1, 3), 16) || 128;
+    const g = parseInt(hex.slice(3, 5), 16) || 128;
+    const b = parseInt(hex.slice(5, 7), 16) || 128;
+
+    if (b > r + 20 && b > g) {
+      return { fotoDespues: kitchenBlueImg, requiereOverlayCustom: false, tonalidadDetectada: "azul" };
+    }
+    if (g > r + 15 && g > b) {
+      return { fotoDespues: kitchenGreenImg, requiereOverlayCustom: false, tonalidadDetectada: "verde" };
+    }
+    if (r > 150 && g > 130 && b < 100) {
+      return { fotoDespues: kitchenYellowImg, requiereOverlayCustom: false, tonalidadDetectada: "amarillo" };
+    }
+    if (r > g + 25 && r > b + 25) {
+      return { fotoDespues: kitchenRedImg, requiereOverlayCustom: false, tonalidadDetectada: "rojo" };
+    }
+  } catch {
+    // ignore
+  }
+
+  return { fotoDespues: kitchenLuxuryImg, requiereOverlayCustom: true, tonalidadDetectada: "blanco" };
 }
 
 /**
  * 6 FOTOS CURADAS Y REVISADAS PARA EL SIMULADOR DE COLOR:
  *
- * 1. SALA (ID: 10001)
+ * 1. SALA (Pexels ID: 10001)
+ *    Foto: designer_livingroom_1790412952964.jpg
  *    Espacio: Sala de diseño orgánico con sofá curvo y amplia pared de fondo focal.
- *    Polígono: Recorta exactamente la pared posterior, excluyendo ventanal izquierdo, pilar derecho y sofá.
+ *    Polígono: Recorta exactamente la pared posterior, excluyendo ventanal y cortinas (<30%), pilar derecho (>91%) y sofá (<58%).
  *
- * 2. HABITACIÓN (ID: 6580214)
- *    Autor: Max Vakhtbovych
+ * 2. HABITACIÓN (Pexels ID: 6580214 - Max Vakhtbovych)
+ *    Foto: bedroom_minimal_6580214.jpg
  *    Espacio: Dormitorio contemporáneo con cama principal y pared cabecera blanca.
- *    Polígono: Recorta la pared cabecera entre cortinas y armario, por encima del respaldar.
+ *    Polígono: Recorta la pared cabecera entre cortinas (16%) y armario (69%), sobre la cabecera acolchada (58%).
  *
- * 3. COCINA (ID: 271647)
- *    Autor: Pixabay
- *    Espacio: Cocina y comedor contemporáneo despejado con luz natural y pared blanca amplia.
- *    Polígono: Recorta la pared completa por encima de la mesa/barra, dejando muebles y vajilla intactos.
+ * 3. COCINA (Pexels ID: 10568026 - Cup of Couple)
+ *    Foto: kitchen_minimal_10568026.jpg
+ *    Espacio: Cocina minimalista despejada con luz natural y pared amplia sobre mesón.
+ *    Polígono: Recorta de 0% a 100% horizontalmente desde el techo hasta la superficie del mesón (60%).
  *
- * 4. BAÑO (ID: 10004)
- *    Espacio: Baño de lujo con tina exenta, tocador de madera y pared de acento.
- *    Polígono: Recorta la pared superior, respetando la ventana vertical, la tina y el tocador.
+ * 4. BAÑO (Pexels ID: 10004)
+ *    Foto: luxury_bathroom_1790413117503.jpg
+ *    Espacio: Baño de lujo con tina exenta, tocador de madera y pared de acento verde salvia.
+ *    Polígono: Inicia tras el ventanal (34%) hasta 100%, sobre el tocador (52%) y sobre la tina (59%).
  *
- * 5. OFICINA (ID: 10567351)
- *    Autor: Cup of Couple
+ * 5. OFICINA (Pexels ID: 10567351 - Cup of Couple)
+ *    Foto: office_minimal_10567351.jpg
  *    Espacio: Home office minimalista con escritorio de madera y amplia pared limpia sin obstrucciones.
- *    Polígono: Recorta la pared superior completa, dejando el escritorio, silla y piso intactos.
+ *    Polígono: Recorta la pared superior completa de 0% a 100% hasta el filo del escritorio (68%).
  *
- * 6. FACHADA (ID: 10006)
- *    Espacio: Fachada exterior contemporánea de dos niveles con jardín y cielo.
- *    Polígono: Recorta los muros de estuco, respetando el cielo azul superior y el prado/jardín inferior.
+ * 6. FACHADA (Pexels ID: 20295564 - Jan van der Wolf)
+ *    Foto: facade_minimal_20295564.jpg
+ *    Espacio: Fachada exterior contemporánea de estuco con cielo azul despejado.
+ *    Polígono: Recorta de 0% a 100% horizontalmente desde la cornisa del alero (28%) preservando el cielo azul intacto.
  */
 export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
   sala: {
@@ -86,20 +207,28 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
     query: "luxury living room curved sofa organic design modern white wall",
     label: "Sala",
     icon: <Home className="w-3.5 h-3.5" />,
+    aspectRatio: "1200 / 896",
+    grupo: "interiores",
   },
   habitacion: {
     id: 6580214,
-    url: "https://images.pexels.com/photos/6580214/pexels-photo-6580214.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    url: bedroomImg,
     query: "bright modern bedroom empty wall interior",
     label: "Habitación",
     icon: <Bed className="w-3.5 h-3.5" />,
+    aspectRatio: "940 / 645",
+    grupo: "interiores",
+    photographer: "Max Vakhtbovych",
   },
   cocina: {
-    id: 271647,
-    url: "https://images.pexels.com/photos/271647/pexels-photo-271647.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-    query: "sleek modern kitchen and dining area with natural light wall",
+    id: 10568026,
+    url: kitchenLuxuryImg,
+    query: "luxury modern kitchen waterfall island barstools",
     label: "Cocina",
     icon: <UtensilsCrossed className="w-3.5 h-3.5" />,
+    aspectRatio: "896 / 1200",
+    grupo: "interiores",
+    photographer: "ColorLink Studio",
   },
   bano: {
     id: 10004,
@@ -107,20 +236,28 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
     query: "modern luxury bathroom soaking tub wood vanity sage green wall",
     label: "Baño",
     icon: <Bath className="w-3.5 h-3.5" />,
+    aspectRatio: "1376 / 768",
+    grupo: "interiores",
   },
   oficina: {
     id: 10567351,
-    url: "https://images.pexels.com/photos/10567351/pexels-photo-10567351.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    url: officeImg,
     query: "minimalist home office wooden desk empty wall",
     label: "Oficina",
     icon: <Briefcase className="w-3.5 h-3.5" />,
+    aspectRatio: "940 / 627",
+    grupo: "interiores",
+    photographer: "Cup of Couple",
   },
   fachada: {
-    id: 10006,
+    id: 20295564,
     url: facadeArchImg,
-    query: "modern house white facade exterior",
+    query: "modern building facade plain stucco wall clear sky",
     label: "Fachada",
     icon: <DoorOpen className="w-3.5 h-3.5" />,
+    aspectRatio: "940 / 627",
+    grupo: "exteriores",
+    photographer: "Jan van der Wolf",
   },
 };
 
@@ -129,29 +266,52 @@ export const FOTOS_CURADAS_ESCENAS: Record<EscenaVisualizador, EscenaConfig> = {
  * en cada una de las 6 escenas, preservando piso, techo, muebles, marcos y ventanas.
  */
 export const CLIP_PATHS_PARED_ESCENAS: Record<EscenaVisualizador, string> = {
-  // Sala: Pared de fondo focal detrás del sofá curvo.
-  // Evita ventana y cortina lateral (<16%), pilar derecho (>88%) y sofá/mesa/piso (>57%).
-  sala: "polygon(16% 0%, 88% 0%, 88% 58%, 65% 58%, 40% 57%, 16% 56%)",
+  // 1. SALA
+  // Foto: designer_livingroom_1790412952964.jpg (Pexels ID 10001)
+  // Pared focal ubicada detrás del sofá curvo.
+  // Límites: Inicia tras las cortinas izquierdas (X: 30%), bajo la cornisa del techo (Y: 2%),
+  // antes del pilar derecho (X: 91%) y bordea el respaldar curvo del sofá (Y: 53%-58%).
+  // NOTA: Si se cambia esta foto, actualizar este polígono.
+  sala: "polygon(30% 2%, 91% 2%, 91% 55%, 65% 53%, 45% 55%, 30% 58%)",
 
-  // Habitación: Pared cabecera detrás de la cama principal.
-  // Evita cortinas izquierdas (<3%), armario lateral (>71%) y cabecera con almohadas (>63%).
-  habitacion: "polygon(3% 0%, 71% 0%, 71% 63%, 3% 63%)",
+  // 2. HABITACIÓN
+  // Foto: bedroom_minimal_6580214.jpg (Pexels ID 6580214 - Max Vakhtbovych)
+  // Pared cabecera principal directamente detrás de la cama.
+  // Límites: Inicia tras la caída de cortinas (X: 16%), bajo el techo (Y: 0%),
+  // antes del armario lateral (X: 69%) y sobre la cabecera acolchada/mesitas (Y: 58%).
+  // NOTA: Si se cambia esta foto, actualizar este polígono.
+  habitacion: "polygon(16% 0%, 69% 0%, 69% 58%, 16% 58%)",
 
-  // Cocina: Amplia pared focal moderna sobre la zona de comedor y barra de cocina.
-  // Abarca de lado a lado (0% a 100%) desde el techo hasta la superficie del mesón (58%).
-  cocina: "polygon(0% 0%, 100% 0%, 100% 58%, 0% 58%)",
+  // 3. COCINA
+  // Foto base: kitchen_luxury_1791046677953.jpg (ColorLink Studio)
+  // Espacio: Cocina abierta contemporánea con isla de mármol y taburetes de madera/ratán.
+  // La cocina cuenta con renders fotográficos directos para Rojo (Vino Tinto), Azul, Verde Oliva y Amarillo Ocre.
+  // Este polígono cubre techo y pared posterior para tonos libres o personalizados.
+  cocina: "polygon(0% 0%, 100% 0%, 100% 48%, 85% 48%, 85% 58%, 35% 58%, 35% 48%, 0% 48%)",
 
-  // Baño: Pared principal de acento sobre la tina exenta y tocador de madera.
-  // Evita el ventanal izquierdo (<21%), la tina (>59%) y el tocador con lavamanos (>54%).
-  bano: "polygon(21% 0%, 100% 0%, 100% 54%, 60% 54%, 60% 59%, 21% 59%)",
+  // 4. BAÑO
+  // Foto: luxury_bathroom_1790413117503.jpg (Pexels ID 10004)
+  // Pared de acento verde salvia sobre la tina exenta y tocador suspendido.
+  // Límites: Inicia a la derecha del ventanal negro (X: 34%) hasta el borde derecho (X: 100%),
+  // bajando hasta el espejo/tocador (Y: 52% entre X: 100% y 60%) y borde de la tina (Y: 59% entre X: 60% y 34%).
+  // NOTA: Si se cambia esta foto, actualizar este polígono.
+  bano: "polygon(34% 0%, 100% 0%, 100% 52%, 60% 52%, 60% 59%, 34% 59%)",
 
-  // Oficina: Pared de fondo del estudio de trabajo minimalista.
-  // Despejada de lado a lado (0% a 100%) desde el techo hasta el filo del escritorio (48%).
-  oficina: "polygon(0% 0%, 100% 0%, 100% 48%, 0% 48%)",
+  // 5. OFICINA
+  // Foto: office_minimal_10567351.jpg (Pexels ID 10567351 - Cup of Couple)
+  // Pared de estudio minimalista con escritorio de madera.
+  // Límites: Cubre de extremo a extremo (X: 0% a 100%) desde el techo (Y: 0%)
+  // hasta el plano de trabajo del escritorio (Y: 68% en extremos, 69% al centro).
+  // NOTA: Si se cambia esta foto, actualizar este polígono.
+  oficina: "polygon(0% 0%, 100% 0%, 100% 68%, 75% 67%, 50% 69%, 25% 68%, 0% 68%)",
 
-  // Fachada: Muros exteriores contemporáneos de la casa.
-  // Sigue fielmente la línea del tejado para no teñir el cielo azul, y la base para no teñir el jardín ni prado.
-  fachada: "polygon(10% 22%, 35% 15%, 60% 21%, 85% 12%, 96% 12%, 96% 67%, 65% 69%, 35% 70%, 10% 70%)",
+  // 6. FACHADA
+  // Foto: facade_minimal_20295564.jpg (Pexels ID 20295564 - Jan van der Wolf)
+  // Muros exteriores de estuco contemporáneo bajo cielo azul despejado.
+  // Límites: Abarca de extremo a extremo (X: 0% a 100%) desde la línea del alero/cornisa
+  // que separa la pared del cielo azul (Y: 28%) hasta la base de la fachada (Y: 100%).
+  // NOTA: Si se cambia esta foto, actualizar este polígono.
+  fachada: "polygon(0% 28%, 100% 28%, 100% 100%, 0% 100%)",
 };
 
 const PALETA_DEMO: ColorOption[] = [
@@ -188,13 +348,13 @@ export const ColorVisualizer: React.FC<Props> = ({
   const [colorInterno, setColorInterno] = useState<ColorOption>(palette[0]);
   const [escena, setEscena] = useState<EscenaVisualizador>("sala");
   const [sliderPct, setSliderPct] = useState(55);
+  const [grupoFiltro, setGrupoFiltro] = useState<"todos" | "interiores" | "exteriores">("todos");
 
-  // Mapa de URLs activas por escena (inicia con las curadas fijas o localStorage versionado v2)
+  // Mapa de URLs activas por escena (inicia con las 6 fotos curadas de alta resolución)
   const [fotosEscenas, setFotosEscenas] = useState<Record<EscenaVisualizador, string>>(() => {
     const inicial: Record<string, string> = {};
     (Object.keys(FOTOS_CURADAS_ESCENAS) as EscenaVisualizador[]).forEach((key) => {
-      const enStorage = localStorage.getItem(`colorlink_foto_v2_${key}`);
-      inicial[key] = enStorage || FOTOS_CURADAS_ESCENAS[key].url;
+      inicial[key] = FOTOS_CURADAS_ESCENAS[key].url;
     });
     return inicial as Record<EscenaVisualizador, string>;
   });
@@ -221,14 +381,14 @@ export const ColorVisualizer: React.FC<Props> = ({
   };
 
   /**
-   * Respaldo automático: si una foto curada falla (ej: 404 o borrada de Pexels),
-   * consulta la API de Pexels con per_page=6 para traer un reemplazo fresco.
+   * Respaldo automático: si una foto curada fallase por red,
+   * consulta la API de Pexels para traer un reemplazo fresco.
    */
   const manejarFalloFoto = async (escenaFallida: EscenaVisualizador) => {
-    if (erroresCarga[escenaFallida]) return; // ya reportado
+    if (erroresCarga[escenaFallida]) return;
 
     console.warn(
-      `[ColorVisualizer] La URL curada para ${escenaFallida} falló. Intentando autorecuperación con Pexels...`
+      `[ColorVisualizer] Foto para ${escenaFallida} no disponible. Intentando autorecuperación con Pexels...`
     );
     setReintentando(true);
 
@@ -250,11 +410,6 @@ export const ColorVisualizer: React.FC<Props> = ({
 
         if (nuevaUrl) {
           setFotosEscenas((prev) => ({ ...prev, [escenaFallida]: nuevaUrl }));
-          try {
-            localStorage.setItem(`colorlink_foto_v2_${escenaFallida}`, nuevaUrl);
-          } catch {
-            // ignore
-          }
           setReintentando(false);
           return;
         }
@@ -271,56 +426,117 @@ export const ColorVisualizer: React.FC<Props> = ({
   const falloActual = erroresCarga[escena];
   const usarFotoReal = Boolean(fotoActual && !falloActual);
 
+  const resolucionCocina = resolverFotoCocinaPorColor(colorActivo);
+  const fotoAntes = escena === "cocina" ? kitchenLuxuryImg : fotoActual;
+  const fotoDespues = escena === "cocina" ? resolucionCocina.fotoDespues : fotoActual;
+  const aplicarOverlayColor =
+    escena !== "cocina" || resolucionCocina.requiereOverlayCustom;
+
   return (
     <div className="bg-white rounded-xl border border-[#E7E5E4] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
-      {/* Barra superior con selector de 6 escenas */}
-      <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between flex-wrap gap-3">
+      {/* Barra superior con selector agrupado de 6 escenas */}
+      <div className="px-5 py-4 border-b border-stone-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Paintbrush className="w-4 h-4 text-[#00A896]" />
+          <Paintbrush className="w-4 h-4 text-[#E2622F]" />
           <h3 className="font-bold text-[#1C1917] text-sm">
             Simulador de color en vivo
           </h3>
           {usarFotoReal && (
-            <span className="text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded font-normal hidden sm:inline">
-              Foto real de alta definición
+            <span className="text-[10px] text-stone-500 bg-stone-100 px-2 py-0.5 rounded font-medium hidden sm:inline">
+              {escena === "cocina" ? "Fotografía multicromática activa" : "Pared recortada con precisión"}
             </span>
           )}
         </div>
 
         {mostrarSelectorEscena && (
-          <div className="flex items-center rounded-lg bg-stone-100 p-0.5 text-xs font-medium overflow-x-auto max-w-full scrollbar-none">
-            {(Object.keys(FOTOS_CURADAS_ESCENAS) as EscenaVisualizador[]).map((key) => {
-              const cfg = FOTOS_CURADAS_ESCENAS[key];
-              const isSelected = escena === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setEscena(key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition whitespace-nowrap cursor-pointer ${
-                    isSelected
-                      ? "bg-white shadow-xs text-[#001D40] font-semibold"
-                      : "text-stone-500 hover:text-stone-800"
-                  }`}
-                  id={`btn-escena-${key}`}
-                >
-                  {cfg.icon}
-                  <span>{cfg.label}</span>
-                </button>
-              );
-            })}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {/* 7. Agrupación visible arriba / al frente del selector de escenas */}
+            <div className="flex items-center rounded-lg bg-stone-100 p-0.5 text-xs font-semibold self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setGrupoFiltro("todos")}
+                className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                  grupoFiltro === "todos"
+                    ? "bg-white shadow-xs text-[#001D40]"
+                    : "text-stone-500 hover:text-stone-800"
+                }`}
+              >
+                Todas (6)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setGrupoFiltro("interiores");
+                  if (escena === "fachada") setEscena("sala");
+                }}
+                className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                  grupoFiltro === "interiores"
+                    ? "bg-white shadow-xs text-[#001D40]"
+                    : "text-stone-500 hover:text-stone-800"
+                }`}
+              >
+                Interiores (5)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setGrupoFiltro("exteriores");
+                  setEscena("fachada");
+                }}
+                className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                  grupoFiltro === "exteriores"
+                    ? "bg-white shadow-xs text-[#001D40]"
+                    : "text-stone-500 hover:text-stone-800"
+                }`}
+              >
+                Exteriores (1)
+              </button>
+            </div>
+
+            {/* Botones de escenas filtradas */}
+            <div className="flex items-center rounded-lg bg-stone-100 p-0.5 text-xs font-medium overflow-x-auto max-w-full scrollbar-none">
+              {(Object.keys(FOTOS_CURADAS_ESCENAS) as EscenaVisualizador[])
+                .filter((key) => {
+                  if (grupoFiltro === "interiores") return FOTOS_CURADAS_ESCENAS[key].grupo === "interiores";
+                  if (grupoFiltro === "exteriores") return FOTOS_CURADAS_ESCENAS[key].grupo === "exteriores";
+                  return true;
+                })
+                .map((key) => {
+                  const cfg = FOTOS_CURADAS_ESCENAS[key];
+                  const isSelected = escena === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setEscena(key)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition whitespace-nowrap cursor-pointer ${
+                        isSelected
+                          ? "bg-white shadow-xs text-[#001D40] font-semibold"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                      id={`btn-escena-${key}`}
+                    >
+                      {cfg.icon}
+                      <span>{cfg.label}</span>
+                    </button>
+                  );
+                })}
+            </div>
           </div>
         )}
       </div>
 
       <div className="p-5">
         <div
-          className="relative w-full rounded-lg overflow-hidden select-none bg-stone-100"
-          style={{ aspectRatio: "4 / 3" }}
+          className="relative w-full rounded-lg overflow-hidden select-none bg-stone-100 transition-[aspect-ratio] duration-200"
+          style={{
+            aspectRatio: FOTOS_CURADAS_ESCENAS[escena].aspectRatio,
+            maxHeight: escena === "cocina" ? "620px" : undefined,
+          }}
         >
           {reintentando ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-500 text-xs z-30">
-              <Loader2 className="w-6 h-6 animate-spin text-[#00A896] mb-2" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#E2622F] mb-2" />
               <span className="font-medium text-stone-600">Actualizando vista previa...</span>
             </div>
           ) : usarFotoReal ? (
@@ -328,33 +544,35 @@ export const ColorVisualizer: React.FC<Props> = ({
               {/* Capa "antes": foto real en su tono original sin capa de color */}
               <div className="absolute inset-0">
                 <img
-                  src={fotoActual}
+                  src={fotoAntes}
                   alt={`Espacio ${FOTOS_CURADAS_ESCENAS[escena].label} antes de pintar`}
                   className="w-full h-full object-cover"
                   onError={() => manejarFalloFoto(escena)}
                 />
               </div>
 
-              {/* Capa "después": foto real con capa de color aplicada con multiply y máscara */}
+              {/* Capa "después": foto real con el color aplicado (o render directo si es cocina) */}
               <div
                 className="absolute inset-0 transition-[clip-path] duration-100"
                 style={{ clipPath: `inset(0 ${100 - sliderPct}% 0 0)` }}
               >
                 <img
-                  src={fotoActual}
+                  src={fotoDespues}
                   alt={`Espacio ${FOTOS_CURADAS_ESCENAS[escena].label} pintado con ${colorActivo.name}`}
                   className="w-full h-full object-cover"
                 />
                 {/* Capa de color fiel aplicada ÚNICAMENTE sobre la pared recortada con polígono a la medida */}
-                <div
-                  className="absolute inset-0 pointer-events-none transition-[background-color] duration-150"
-                  style={{
-                    backgroundColor: colorActivo.hex,
-                    mixBlendMode: "multiply",
-                    opacity: 0.68,
-                    clipPath: CLIP_PATHS_PARED_ESCENAS[escena],
-                  }}
-                />
+                {aplicarOverlayColor && (
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-[background-color] duration-150"
+                    style={{
+                      backgroundColor: colorActivo.hex,
+                      mixBlendMode: "multiply",
+                      opacity: 0.72,
+                      clipPath: CLIP_PATHS_PARED_ESCENAS[escena],
+                    }}
+                  />
+                )}
               </div>
             </>
           ) : (
@@ -424,6 +642,30 @@ export const ColorVisualizer: React.FC<Props> = ({
             <p className="text-xs text-stone-400 uppercase font-mono">{colorActivo.hex}</p>
           </div>
         </div>
+
+        {/* Notificación interactiva de la cocina */}
+        {escena === "cocina" && (
+          <div className="mt-3 flex items-center justify-between text-xs bg-[#E2622F]/10 border border-[#E2622F]/20 rounded-lg px-3.5 py-2 text-[#2B211C]">
+            <span className="flex items-center gap-2 font-medium">
+              <span>🎨</span>
+              <span>
+                Cocina interactiva: Techo y muros cambian automáticamente a{" "}
+                <strong className="capitalize text-[#E2622F]">
+                  {resolucionCocina.tonalidadDetectada === "rojo"
+                    ? "Rojo / Vino Tinto"
+                    : resolucionCocina.tonalidadDetectada === "azul"
+                    ? "Azul Grisáceo"
+                    : resolucionCocina.tonalidadDetectada === "verde"
+                    ? "Verde Oliva / Menta"
+                    : resolucionCocina.tonalidadDetectada === "amarillo"
+                    ? "Amarillo Ocre"
+                    : "Blanco Nube / Neutro"}
+                </strong>
+                , manteniendo la isla de mármol, los taburetes y el piso de roble libres de manchas.
+              </span>
+            </span>
+          </div>
+        )}
 
         {/* Paleta (solo si no viene un color fijo desde afuera) */}
         {!colorHex && (

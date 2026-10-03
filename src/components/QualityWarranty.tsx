@@ -48,7 +48,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
         particleCount: 60,
         spread: 60,
         origin: { y: 0.6 },
-        colors: ["#001D40", "#00A896", "#10B981"],
+        colors: ["#1A1715", "#E2622F", "#10B981"],
       });
     } catch {
       // safe fallback
@@ -89,13 +89,13 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
     <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
       {/* Top Banner */}
       <div className="text-center max-w-xl mx-auto mb-10">
-        <div className="w-14 h-14 rounded-xl bg-[#001D40] text-[#00A896] flex items-center justify-center mx-auto mb-3 shadow-sm">
+        <div className="w-14 h-14 rounded-xl bg-[#1A1715] text-[#E2622F] flex items-center justify-center mx-auto mb-3 shadow-sm">
           <Award className="w-7 h-7" />
         </div>
-        <span className="text-xs font-semibold text-[#00A896] uppercase tracking-wider">
+        <span className="text-xs font-semibold text-[#E2622F] uppercase tracking-wider">
           Paso 6 de 6 · Garantía oficial emitida
         </span>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917] mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2B211C] mt-1">
           ¡Tu proyecto está protegido con Pintuco 360!
         </h1>
         <p className="text-sm text-stone-500 mt-1">
@@ -106,13 +106,13 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Official Digital Certificate */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border-2 border-[#001D40] relative overflow-hidden print:shadow-none print:border-black print:m-0">
+          <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border-2 border-[#1A1715] relative overflow-hidden print:shadow-none print:border-black print:m-0">
             {/* Certificate Header */}
             <div className="flex items-start justify-between pb-5 border-b border-stone-200">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-[#001D40] tracking-tight">PINTUCO</span>
-                  <span className="text-xs font-semibold text-[#00A896] bg-[#00A896]/10 px-2 py-0.5 rounded">
+                  <span className="text-xl font-bold text-[#1A1715] tracking-tight">PINTUCO</span>
+                  <span className="text-xs font-semibold text-[#E2622F] bg-[#E2622F]/10 px-2 py-0.5 rounded">
                     Póliza oficial 360
                   </span>
                 </div>
@@ -122,7 +122,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
               </div>
 
               <div className="text-right">
-                <span className="font-mono text-xs font-bold text-[#001D40] block">
+                <span className="font-mono text-xs font-bold text-[#1A1715] block">
                   {policyNumber}
                 </span>
                 <span className="text-[10px] text-stone-400">Emisión: {issueDate}</span>
@@ -134,7 +134,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-stone-400 block font-medium">Titular del proyecto:</span>
-                  <span className="font-bold text-[#1C1917] text-sm block">
+                  <span className="font-bold text-[#2B211C] text-sm block">
                     {user?.name || "Cliente verificado ColorLink"}
                   </span>
                   <span className="text-stone-500 text-[11px]">
@@ -187,19 +187,19 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
                 <span className="font-semibold text-stone-700 block">Cobertura garantizada:</span>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-stone-600">
                   <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E2622F] shrink-0" />
                     <span>Resistencia a la intemperie y rayos UV</span>
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E2622F] shrink-0" />
                     <span>Poder cubriente y estabilidad del color</span>
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E2622F] shrink-0" />
                     <span>Adherencia técnica sin descascaramiento</span>
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00A896] shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E2622F] shrink-0" />
                     <span>Inspección técnica gratuita por reclamo</span>
                   </li>
                 </ul>
@@ -209,7 +209,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             {/* Certificate Footer Signature */}
             <div className="pt-4 border-t border-stone-200 flex items-center justify-between text-xs text-stone-500">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#00A896]" />
+                <ShieldCheck className="w-4 h-4 text-[#E2622F]" />
                 <span className="text-[11px]">Firma digitalizada de calidad Pintuco S.A.</span>
               </div>
               <span className="text-[11px] font-mono text-stone-400">Verificado NTC</span>
@@ -221,9 +221,9 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             <button
               type="button"
               onClick={handleDownloadCertificate}
-              className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium py-2.5 px-4 rounded-lg text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
+              className="border border-stone-300 hover:bg-stone-50 text-[#1A1715] font-medium py-2.5 px-4 rounded-lg text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
             >
-              <Printer className="w-4 h-4 text-[#00A896]" />
+              <Printer className="w-4 h-4 text-[#E2622F]" />
               <span>{downloadSuccess ? "Imprimiendo..." : "Imprimir / Guardar PDF"}</span>
             </button>
 
@@ -240,8 +240,8 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
         {/* Right Column: Feedback, Satisfaction & New Project */}
         <div className="lg:col-span-5 space-y-4">
           {/* Quick Rating Widget */}
-          <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-3">
-            <h3 className="font-bold text-[#1C1917] text-sm">
+          <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm space-y-3">
+            <h3 className="font-bold text-[#2B211C] text-sm">
               ¿Cómo calificarías tu experiencia en ColorLink?
             </h3>
             <p className="text-xs text-stone-500">
@@ -271,8 +271,8 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
           </div>
 
           {/* New Project CTA */}
-          <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-3">
-            <h3 className="font-bold text-[#1C1917] text-sm">
+          <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm space-y-3">
+            <h3 className="font-bold text-[#2B211C] text-sm">
               ¿Deseas iniciar otro proyecto de pintura?
             </h3>
             <p className="text-xs text-stone-500 leading-relaxed">
@@ -281,7 +281,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             <button
               type="button"
               onClick={onResetApp}
-              className="w-full bg-[#00A896] hover:bg-[#009282] text-white font-medium py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm"
+              className="w-full bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"
               id="btn-reset-flow"
             >
               <RotateCcw className="w-4 h-4" />
@@ -294,10 +294,10 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
       {/* Claim Modal */}
       {claimModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-[#E7E5E4] space-y-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-[#E8DFD5] space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h3 className="font-bold text-sm text-[#1C1917] flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#00A896]" />
+              <h3 className="font-bold text-sm text-[#2B211C] flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#E2622F]" />
                 Solicitud de asistencia técnica de garantía
               </h3>
               <button
@@ -341,7 +341,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#00A896] hover:bg-[#009282] text-white rounded-lg font-medium"
+                    className="px-4 py-2 bg-[#E2622F] hover:bg-[#C95222] text-white rounded-lg font-medium"
                   >
                     Radicar solicitud
                   </button>
@@ -350,7 +350,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
             ) : (
               <div className="py-4 text-center space-y-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h4 className="font-bold text-sm text-[#1C1917]">Solicitud radicada con éxito</h4>
+                <h4 className="font-bold text-sm text-[#2B211C]">Solicitud radicada con éxito</h4>
                 <p className="text-xs text-stone-500">
                   Número de radicado: #REC-2026-0849. Un asesor técnico se comunicará en menos de 24 horas hábiles.
                 </p>
@@ -360,7 +360,7 @@ export const QualityWarranty: React.FC<QualityWarrantyProps> = ({
                     setClaimSubmitted(false);
                     setClaimModalOpen(false);
                   }}
-                  className="mt-2 px-4 py-2 bg-[#001D40] text-white text-xs rounded-lg font-medium"
+                  className="mt-2 px-4 py-2 bg-[#1A1715] text-white text-xs rounded-lg font-medium"
                 >
                   Entendido
                 </button>

@@ -73,13 +73,13 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
       {/* Step Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-xs font-semibold text-[#00A896]">
+          <span className="text-xs font-semibold text-[#E2622F]">
             Paso 4 de 6
           </span>
           <span className="text-stone-300">·</span>
           <span className="text-xs text-stone-500">Abastecimiento y despacho</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2B211C]">
           Disponibilidad y método de entrega
         </h1>
         <p className="text-sm text-stone-500 mt-1">
@@ -116,7 +116,7 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
 
       {/* Delivery Method Selector */}
       <div className="space-y-4 mb-8">
-        <h2 className="text-base font-bold text-[#1C1917]">
+        <h2 className="text-base font-bold text-[#2B211C]">
           Selecciona cómo deseas recibir el pedido
         </h2>
 
@@ -126,21 +126,21 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
             onClick={() => setDeliveryMethod("domicilio_express")}
             className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
               deliveryMethod === "domicilio_express"
-                ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F] shadow-sm"
+                : "border-[#E8DFD5] hover:border-stone-300 bg-white"
             }`}
             id="opt-delivery-express"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-9 h-9 rounded-lg bg-stone-100 text-[#001D40] flex items-center justify-center">
-                  <Truck className="w-5 h-5 text-[#00A896]" />
+                <div className="w-9 h-9 rounded-lg bg-stone-100 text-[#1A1715] flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-[#E2622F]" />
                 </div>
                 {deliveryMethod === "domicilio_express" && (
-                  <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
+                  <CheckCircle2 className="w-5 h-5 text-[#E2622F]" />
                 )}
               </div>
-              <h3 className="font-bold text-sm text-[#1C1917]">
+              <h3 className="font-bold text-sm text-[#2B211C]">
                 Despacho directo a la obra o domicilio
               </h3>
               <p className="text-xs text-stone-500 mt-1 leading-relaxed">
@@ -159,21 +159,21 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
             onClick={() => setDeliveryMethod("retiro_tienda")}
             className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
               deliveryMethod === "retiro_tienda"
-                ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F] shadow-sm"
+                : "border-[#E8DFD5] hover:border-stone-300 bg-white"
             }`}
             id="opt-delivery-pickup"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-9 h-9 rounded-lg bg-stone-100 text-[#001D40] flex items-center justify-center">
-                  <Store className="w-5 h-5 text-[#00A896]" />
+                <div className="w-9 h-9 rounded-lg bg-stone-100 text-[#1A1715] flex items-center justify-center">
+                  <Store className="w-5 h-5 text-[#E2622F]" />
                 </div>
                 {deliveryMethod === "retiro_tienda" && (
-                  <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
+                  <CheckCircle2 className="w-5 h-5 text-[#E2622F]" />
                 )}
               </div>
-              <h3 className="font-bold text-sm text-[#1C1917]">
+              <h3 className="font-bold text-sm text-[#2B211C]">
                 Retiro en tienda autorizada Pintuco
               </h3>
               <p className="text-xs text-stone-500 mt-1 leading-relaxed">
@@ -183,7 +183,7 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
 
             <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
               <span className="text-stone-400">Sedes disponibles:</span>
-              <span className="font-semibold text-[#001D40]">{displayStores.length} tiendas</span>
+              <span className="font-semibold text-[#1A1715]">{displayStores.length} tiendas</span>
             </div>
           </div>
         </div>
@@ -191,9 +191,9 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
 
       {/* Store list if pickup selected */}
       {deliveryMethod === "retiro_tienda" && (
-        <div className="bg-white rounded-xl border border-[#E7E5E4] p-5 shadow-sm mb-8 space-y-4">
+        <div className="bg-white rounded-xl border border-[#E8DFD5] p-5 shadow-sm mb-8 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#1C1917]">
+            <h3 className="text-sm font-bold text-[#2B211C]">
               Selecciona la sede de retiro
             </h3>
             <span className="text-xs text-stone-400">
@@ -210,14 +210,14 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
                   onClick={() => setSelectedStoreId(store.id)}
                   className={`p-3.5 rounded-lg border cursor-pointer transition flex items-center justify-between gap-3 ${
                     isSelected
-                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896]"
-                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                      ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F]"
+                      : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-[#00A896] shrink-0 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-[#E2622F] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xs font-bold text-[#1C1917]">{store.name}</h4>
+                      <h4 className="text-xs font-bold text-[#2B211C]">{store.name}</h4>
                       <p className="text-xs text-stone-500">{store.address} · {store.city}</p>
                       <p className="text-[11px] text-stone-400 mt-0.5">
                         Horario: {store.openingHours} · Tel: {store.phone}
@@ -226,7 +226,7 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-xs font-semibold text-[#001D40] block">
+                    <span className="text-xs font-semibold text-[#1A1715] block">
                       {store.distance}
                     </span>
                     <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
@@ -241,11 +241,11 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
       )}
 
       {/* Navigation Footer */}
-      <div className="pt-6 border-t border-[#E7E5E4] flex items-center justify-between gap-4">
+      <div className="pt-6 border-t border-[#E8DFD5] flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={onBackToTechnical}
-          className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium px-5 py-2.5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer text-sm"
+          className="border border-stone-300 hover:bg-stone-50 text-[#1A1715] font-medium px-5 py-2.5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver a formulación</span>
@@ -254,7 +254,7 @@ export const SupplyAvailability: React.FC<SupplyAvailabilityProps> = ({
         <button
           type="button"
           onClick={handleContinue}
-          className="bg-[#00A896] hover:bg-[#009282] text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition inline-flex items-center gap-2 cursor-pointer text-sm"
+          className="bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition inline-flex items-center gap-2 cursor-pointer text-sm active:scale-[0.98]"
           id="btn-proceed-service"
         >
           <span>Continuar a servicio y agendamiento</span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Paintbrush,
   ShieldCheck,
@@ -30,6 +30,9 @@ import {
   OrderTrackingStep,
 } from "../types";
 import { CERTIFIED_PAINTERS } from "../data/pintucoData";
+import { obtenerTiendas, TiendaDB, TIENDAS_FALLBACK } from "../lib/colorlinkApi";
+import { geocodeAddress, GeocodeResult } from "../lib/geocodingService";
+import { TrackingMapLeaflet } from "./TrackingMapLeaflet";
 
 interface ServiceTrackingProps {
   recommendation: TechnicalRecommendation;
@@ -70,6 +73,62 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
     },
   ]);
   const [newMessage, setNewMessage] = useState("");
+
+  const [tiendas, setTiendas] = useState<TiendaDB[]>(TIENDAS_FALLBACK);
+  const [ubicacionCliente, setUbicacionCliente] = useState<GeocodeResult>({
+    lat: 4.6782,
+    lng: -74.0583,
+    source: "city_fallback",
+  });
+
+  // Cargar tiendas con latitud/longitud de la BD (con fallback local)
+  useEffect(() => {
+    let cancelado = false;
+    async function cargar() {
+      try {
+        const datos = await obtenerTiendas();
+        if (!cancelado && datos.length > 0) {
+          setTiendas(datos);
+        }
+      } catch (e) {
+        console.warn("[ServiceTracking] Usando tiendas locales:", e);
+      }
+    }
+    cargar();
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  // Geocodificar la dirección del cliente usando Nominatim
+  useEffect(() => {
+    let cancelado = false;
+    async function geocodificar() {
+      const res = await geocodeAddress(projectNeed.address, projectNeed.city);
+      if (!cancelado) {
+        setUbicacionCliente(res);
+      }
+    }
+    geocodificar();
+    return () => {
+      cancelado = true;
+    };
+  }, [projectNeed.address, projectNeed.city]);
+
+  // Tienda asignada según la selección previa o ciudad del proyecto
+  const tiendaActiva: TiendaDB = useMemo(() => {
+    if (orderState.storeName) {
+      const match = tiendas.find((t) =>
+        t.nombre.toLowerCase().includes(orderState.storeName!.toLowerCase())
+      );
+      if (match) return match;
+    }
+    const ciudadClean = projectNeed.city.split("(")[0].trim().toLowerCase();
+    const matchCiudad = tiendas.find((t) =>
+      t.ciudad.toLowerCase().includes(ciudadClean)
+    );
+    return matchCiudad || tiendas[0] || TIENDAS_FALLBACK[0];
+  }, [tiendas, orderState.storeName, projectNeed.city]);
 
   const trackingSteps: { id: OrderTrackingStep; title: string; desc: string; icon: any }[] = [
     {
@@ -193,7 +252,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
       {/* Step Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-xs font-semibold text-[#00A896]">
+          <span className="text-xs font-semibold text-[#E2622F]">
             Paso 5 de 6
           </span>
           <span className="text-stone-300">·</span>
@@ -201,7 +260,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
             {isOrderConfirmed ? "Monitoreo en tiempo real" : "Servicio y agendamiento"}
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2B211C]">
           {isOrderConfirmed ? "Seguimiento de orden y aplicación en vivo" : "Servicio de aplicación y agendamiento"}
         </h1>
         <p className="text-sm text-stone-500 mt-1">
@@ -217,8 +276,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
           {/* Left Column: Service & Painter Selection */}
           <div className="lg:col-span-8 space-y-6">
             {/* Service Toggle */}
-            <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
-              <h2 className="text-sm font-bold text-[#1C1917]">
+            <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm space-y-4">
+              <h2 className="text-sm font-bold text-[#2B211C]">
                 Modalidad del servicio
               </h2>
 
@@ -227,21 +286,21 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                   onClick={() => setServiceOption("con_aplicador")}
                   className={`p-4 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
                     serviceOption === "con_aplicador"
-                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                      ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F] shadow-sm"
+                      : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                   }`}
                   id="opt-service-painter"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#001D40] text-white flex items-center justify-center">
-                        <Paintbrush className="w-4 h-4 text-[#00A896]" />
+                      <div className="w-8 h-8 rounded-lg bg-[#1A1715] text-white flex items-center justify-center">
+                        <Paintbrush className="w-4 h-4 text-[#E2622F]" />
                       </div>
                       <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
                         Garantía completa
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-[#1C1917]">Pintura + Maestro certificado</h3>
+                    <h3 className="text-sm font-bold text-[#2B211C]">Pintura + Maestro certificado</h3>
                     <p className="text-xs text-stone-500 mt-1 leading-relaxed">
                       Un maestro avalado prepara la superficie, aplica las 2 manos y activa la póliza oficial Pintuco.
                     </p>
@@ -252,21 +311,21 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                   onClick={() => setServiceOption("solo_materiales")}
                   className={`p-4 rounded-xl border cursor-pointer transition flex flex-col justify-between ${
                     serviceOption === "solo_materiales"
-                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                      ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F] shadow-sm"
+                      : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                   }`}
                   id="opt-service-materials-only"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-8 h-8 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center">
-                        <UserCheck className="w-4 h-4 text-[#001D40]" />
+                        <UserCheck className="w-4 h-4 text-[#1A1715]" />
                       </div>
                       <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
                         Solo producto
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-[#1C1917]">Solo materiales</h3>
+                    <h3 className="text-sm font-bold text-[#2B211C]">Solo materiales</h3>
                     <p className="text-xs text-stone-500 mt-1 leading-relaxed">
                       Recibes la pintura, sellador y accesorios para aplicar por tu cuenta o con tu propio personal.
                     </p>
@@ -277,11 +336,11 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
             {/* Certified Painters Directory */}
             {serviceOption === "con_aplicador" && (
-              <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+              <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-[#1C1917] text-sm flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[#00A896]" />
+                    <h3 className="font-bold text-[#2B211C] text-sm flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[#E2622F]" />
                       Maestros pintores certificados en {projectNeed.city}
                     </h3>
                     <p className="text-xs text-stone-500 mt-0.5">
@@ -299,8 +358,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                         onClick={() => setSelectedPainter(painter)}
                         className={`p-4 rounded-xl border cursor-pointer transition flex flex-col gap-3 ${
                           isSelected
-                            ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                            : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                            ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F] shadow-sm"
+                            : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                         }`}
                         id={`painter-card-${painter.id}`}
                       >
@@ -313,7 +372,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                             />
                             <div>
                               <div className="flex items-center gap-2">
-                                <h4 className="font-bold text-sm text-[#1C1917]">{painter.name}</h4>
+                                <h4 className="font-bold text-sm text-[#2B211C]">{painter.name}</h4>
                                 <div className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
                                   <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                                   <span>{painter.rating}</span>
@@ -341,7 +400,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                               <span className="text-xs font-semibold text-emerald-700 block">{painter.availableSlot}</span>
                             </div>
                             {isSelected ? (
-                              <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#00A896]">
+                              <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#E2622F]">
                                 <CheckCircle2 className="w-4 h-4" /> Seleccionado
                               </div>
                             ) : (
@@ -383,9 +442,9 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
             )}
 
             {/* Schedule Date & Time */}
-            <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
-              <h3 className="font-bold text-[#1C1917] text-sm flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#001D40]" />
+            <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm space-y-4">
+              <h3 className="font-bold text-[#2B211C] text-sm flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#1A1715]" />
                 Fecha y horario del servicio
               </h3>
 
@@ -396,7 +455,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     type="date"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#E7E5E4] text-sm focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                    className="w-full p-2.5 rounded-lg border border-[#E8DFD5] text-sm focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
                   />
                 </div>
                 <div>
@@ -404,7 +463,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                   <select
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#E7E5E4] text-sm focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                    className="w-full p-2.5 rounded-lg border border-[#E8DFD5] text-sm focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
                   >
                     <option value="08:00 AM">Mañana (8:00 AM - 12:00 PM)</option>
                     <option value="01:30 PM">Tarde (1:30 PM - 5:30 PM)</option>
@@ -417,8 +476,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
           {/* Right Column: Payment & Summary */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E7E5E4]">
-              <h3 className="font-bold text-[#1C1917] text-sm pb-3 border-b border-stone-100">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E8DFD5]">
+              <h3 className="font-bold text-[#2B211C] text-sm pb-3 border-b border-stone-100">
                 Resumen de orden
               </h3>
 
@@ -444,7 +503,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
                 <div className="pt-3 border-t border-stone-100 flex justify-between items-baseline">
                   <span className="font-bold text-stone-800 text-sm">Total final:</span>
-                  <span className="text-xl font-bold text-[#001D40]">
+                  <span className="text-xl font-bold text-[#1A1715]">
                     ${calculatedTotal.toLocaleString("es-CO")} COP
                   </span>
                 </div>
@@ -465,8 +524,8 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     onClick={() => setPaymentMethod(pm.id)}
                     className={`flex items-center gap-2.5 p-3 rounded-lg border text-xs cursor-pointer transition ${
                       paymentMethod === pm.id
-                        ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
-                        : "border-[#E7E5E4] text-stone-700 hover:bg-stone-50"
+                        ? "border-[#E2622F] bg-[#E2622F]/5 text-[#1A1715] font-semibold"
+                        : "border-[#E8DFD5] text-stone-700 hover:bg-stone-50"
                     }`}
                   >
                     <input
@@ -474,7 +533,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                       name="payment_method"
                       checked={paymentMethod === pm.id}
                       onChange={() => setPaymentMethod(pm.id)}
-                      className="accent-[#00A896]"
+                      className="accent-[#E2622F]"
                     />
                     <span>{pm.name}</span>
                   </label>
@@ -485,7 +544,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
               <button
                 type="button"
                 onClick={handleConfirmOrder}
-                className="w-full mt-5 bg-[#00A896] hover:bg-[#009282] text-white font-medium py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm"
+                className="w-full mt-5 bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition inline-flex items-center justify-center gap-2 cursor-pointer text-sm active:scale-[0.98]"
                 id="btn-confirm-order-service"
               >
                 <span>Confirmar orden y ver tracking</span>
@@ -506,14 +565,14 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
         /* Active Live Tracking Interface */
         <div className="space-y-6">
           {/* Tracking Control Simulation Bar */}
-          <div className="bg-[#001D40] text-white p-5 rounded-xl shadow-sm border border-stone-800 flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-[#1A1715] text-white p-5 rounded-xl shadow-sm border border-stone-800 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#00A896] text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-[#E2622F] text-white flex items-center justify-center shrink-0">
                 <Truck className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-[#00A896]">
+                  <span className="text-xs font-semibold text-[#E2622F]">
                     Orden #{orderState.orderId}
                   </span>
                   <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-medium px-2 py-0.5 rounded">
@@ -532,7 +591,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                 type="button"
                 onClick={handleNextStepSim}
                 disabled={currentStepIndex >= trackingSteps.length - 1}
-                className="bg-[#00A896] hover:bg-[#009282] disabled:opacity-40 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer"
+                className="bg-[#E2622F] hover:bg-[#C95222] disabled:opacity-40 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer"
                 id="btn-sim-next-step"
               >
                 <span>Avanzar estado</span>
@@ -564,7 +623,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
           </div>
 
           {/* Stepper Progress */}
-          <div className="bg-white p-6 rounded-xl border border-[#E7E5E4] shadow-sm">
+          <div className="bg-white p-6 rounded-xl border border-[#E8DFD5] shadow-sm">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {trackingSteps.map((step, idx) => {
                 const Icon = step.icon;
@@ -576,7 +635,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     key={step.id}
                     className={`flex flex-col items-center text-center p-3 rounded-lg transition ${
                       isCurrent
-                        ? "bg-[#00A896]/5 border border-[#00A896]"
+                        ? "bg-[#E2622F]/5 border border-[#E2622F]"
                         : isPassed
                         ? "bg-emerald-50 border border-emerald-200"
                         : "opacity-40 border border-transparent"
@@ -585,7 +644,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 font-bold ${
                         isCurrent
-                          ? "bg-[#00A896] text-white"
+                          ? "bg-[#E2622F] text-white"
                           : isPassed
                           ? "bg-emerald-600 text-white"
                           : "bg-stone-200 text-stone-500"
@@ -593,7 +652,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     >
                       {isPassed ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                     </div>
-                    <h4 className="text-xs font-bold text-[#1C1917] leading-tight">{step.title}</h4>
+                    <h4 className="text-xs font-bold text-[#2B211C] leading-tight">{step.title}</h4>
                     <p className="text-[10px] text-stone-500 mt-1 leading-snug hidden sm:block">
                       {step.desc}
                     </p>
@@ -605,57 +664,22 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
 
           {/* Live Map & Technician Dispatch Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Live Map Visualizer */}
-            <div className="lg:col-span-7 bg-[#001D40] rounded-xl overflow-hidden shadow-sm border border-stone-800 flex flex-col justify-between min-h-[340px]">
-              <div className="relative w-full h-64 bg-slate-900 overflow-hidden flex items-center justify-center">
-                <svg viewBox="0 0 600 300" className="w-full h-full object-cover opacity-80">
-                  <line x1="50" y1="0" x2="50" y2="300" stroke="#334155" strokeWidth="12" />
-                  <line x1="200" y1="0" x2="200" y2="300" stroke="#334155" strokeWidth="8" />
-                  <line x1="400" y1="0" x2="400" y2="300" stroke="#334155" strokeWidth="16" />
-                  <line x1="0" y1="80" x2="600" y2="80" stroke="#334155" strokeWidth="10" />
-                  <line x1="0" y1="200" x2="600" y2="200" stroke="#334155" strokeWidth="14" />
-                  <path d="M 50,80 Q 200,120 400,200" fill="none" stroke="#00A896" strokeWidth="6" strokeDasharray="8 6" />
-
-                  {currentStepIndex >= 3 && (
-                    <circle cx={currentStepIndex === 3 ? "260" : "400"} cy={currentStepIndex === 3 ? "140" : "200"} r="10" fill="#00A896">
-                      <animate attributeName="r" values="8;13;8" dur="1.5s" repeatCount="indefinite" />
-                    </circle>
-                  )}
-
-                  <rect x="35" y="65" width="30" height="30" rx="6" fill="#001D40" stroke="#FFFFFF" strokeWidth="2" />
-                  <text x="40" y="85" fill="#FFFFFF" fontSize="10" fontWeight="bold">PT</text>
-
-                  <circle cx="400" cy="200" r="14" fill="#00A896" stroke="#FFFFFF" strokeWidth="3" />
-                  <text x="395" y="204" fill="#FFFFFF" fontSize="11" fontWeight="bold">✓</text>
-                </svg>
-
-                <div className="absolute top-4 left-4 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-700 text-white text-xs">
-                  <span className="font-semibold block">Despacho Pintuco autorizado</span>
-                  <span className="text-[11px] text-stone-300">
-                    Destino: {projectNeed.address || "Dirección de obra"} ({projectNeed.city})
-                  </span>
-                </div>
-
-                <div className="absolute bottom-4 right-4 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-700 text-white text-xs">
-                  <span className="text-[10px] text-stone-400 block uppercase font-medium">Tiempo estimado</span>
-                  <span className="text-xs font-bold text-[#00A896]">
-                    {currentStepIndex >= 4 ? "En sitio · Completado" : `${orderState.driverEtaMinutes} min restantes`}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3.5 bg-slate-950 text-xs text-stone-300 flex items-center justify-between border-t border-slate-800">
-                <div className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-[#00A896]" />
-                  <span>Ruta asistida con planta de tinturado</span>
-                </div>
-                <span className="text-stone-400 text-[11px]">Lote: #PNT-8942-A</span>
-              </div>
+            {/* Live Real Leaflet Map (OpenStreetMap) */}
+            <div className="lg:col-span-7">
+              <TrackingMapLeaflet
+                tiendaAsignada={tiendaActiva}
+                todasLasTiendas={tiendas}
+                ubicacionCliente={ubicacionCliente}
+                direccionTexto={projectNeed.address || "Dirección de obra"}
+                ciudadTexto={projectNeed.city}
+                tiempoRestanteMin={orderState.driverEtaMinutes}
+                pasoActualIndex={currentStepIndex}
+              />
             </div>
 
             {/* Assigned Painter Card & Live Chat */}
             <div className="lg:col-span-5 space-y-4">
-              <div className="bg-white p-5 rounded-xl border border-[#E7E5E4] shadow-sm space-y-4">
+              <div className="bg-white p-5 rounded-xl border border-[#E8DFD5] shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                   <span className="text-xs font-semibold text-stone-600">
                     Maestro aplicador asignado
@@ -672,7 +696,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                     className="w-12 h-12 rounded-lg object-cover border border-stone-200 shadow-sm shrink-0"
                   />
                   <div>
-                    <h4 className="font-bold text-sm text-[#1C1917]">{selectedPainter.name}</h4>
+                    <h4 className="font-bold text-sm text-[#2B211C]">{selectedPainter.name}</h4>
                     <p className="text-xs text-stone-500">{selectedPainter.role}</p>
                     <div className="flex items-center gap-1 text-xs text-amber-700 font-semibold mt-0.5">
                       <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -685,16 +709,16 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <a
                     href={`tel:${selectedPainter.phone}`}
-                    className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5"
+                    className="border border-stone-300 hover:bg-stone-50 text-[#1A1715] font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5"
                   >
-                    <Phone className="w-3.5 h-3.5 text-[#00A896]" />
+                    <Phone className="w-3.5 h-3.5 text-[#E2622F]" />
                     <span>Llamar</span>
                   </a>
 
                   <button
                     type="button"
                     onClick={() => setChatOpen(!chatOpen)}
-                    className="bg-[#001D40] hover:bg-stone-800 text-white font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="bg-[#1A1715] hover:bg-stone-800 text-white font-medium py-2 px-3 rounded-lg text-xs transition inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>{chatOpen ? "Ocultar chat" : "Mensaje"}</span>
@@ -714,7 +738,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                           <div
                             className={`p-2.5 rounded-lg max-w-[85%] ${
                               msg.sender === "user"
-                                ? "bg-[#001D40] text-white"
+                                ? "bg-[#1A1715] text-white"
                                 : "bg-white text-stone-800 border border-stone-200 shadow-2xs"
                             }`}
                           >
@@ -731,11 +755,11 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Escribe un mensaje..."
-                        className="flex-1 p-2 text-xs rounded-lg border border-stone-300 bg-white text-[#1C1917]"
+                        className="flex-1 p-2 text-xs rounded-lg border border-stone-300 bg-white text-[#2B211C]"
                       />
                       <button
                         type="submit"
-                        className="bg-[#00A896] hover:bg-[#009282] text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                        className="bg-[#E2622F] hover:bg-[#C95222] text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer"
                       >
                         Enviar
                       </button>
@@ -745,10 +769,10 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
               </div>
 
               {/* Ready for Warranty Next Step CTA */}
-              <div className="bg-white p-5 rounded-xl border border-[#E7E5E4] shadow-sm space-y-3">
+              <div className="bg-white p-5 rounded-xl border border-[#E8DFD5] shadow-sm space-y-3">
                 <div className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#00A896]" />
-                  <h4 className="font-bold text-sm text-[#1C1917]">Póliza de garantía Pintuco 360</h4>
+                  <Award className="w-4 h-4 text-[#E2622F]" />
+                  <h4 className="font-bold text-sm text-[#2B211C]">Póliza de garantía Pintuco 360</h4>
                 </div>
                 <p className="text-xs text-stone-500 leading-relaxed">
                   Al completar la aplicación y la entrega, se emite automáticamente el certificado digital oficial.
@@ -756,7 +780,7 @@ export const ServiceTracking: React.FC<ServiceTrackingProps> = ({
                 <button
                   type="button"
                   onClick={onProceedToQuality}
-                  className="w-full bg-[#00A896] hover:bg-[#009282] text-white font-medium text-xs py-3 px-4 rounded-lg shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-extrabold text-xs py-3.5 px-4 rounded-xl shadow-md transition inline-flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                   id="btn-proceed-quality"
                 >
                   <span>Finalizar servicio y ver garantía</span>

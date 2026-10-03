@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Info,
   X,
+  Images,
 } from "lucide-react";
 import { ProjectNeedState, SurfaceId, ProblemId, PintucoColor, UserProfile, ProblemOption, SurfaceOption } from "../types";
 import {
@@ -29,6 +30,7 @@ import {
   getCoverageM2PerGallon,
 } from "../data/pintucoData";
 import { ColorVisualizer } from "./ColorVisualizer";
+import { SurfaceGalleryModal } from "./SurfaceGalleryModal";
 
 interface NeedWizardProps {
   initialState: ProjectNeedState;
@@ -100,6 +102,24 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
   }
 
   const [confirmacion, setConfirmacion] = useState<ConfirmationData | null>(null);
+  const [gallerySurface, setGallerySurface] = useState<SurfaceOption | null>(null);
+
+  // Desplaza suavemente hacia el inicio del paso activo del asistente (justo debajo del header fijo)
+  const scrollToWizardTop = () => {
+    setTimeout(() => {
+      const el = document.getElementById("wizard-step-top") || document.getElementById("wizard-container");
+      if (el) {
+        const headerOffset = 100;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = window.pageYOffset + elementPosition - headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: "smooth",
+        });
+      }
+    }, 40);
+  };
 
   const handleSelectSurface = (item: SurfaceOption) => {
     setSurface(item.id);
@@ -124,7 +144,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       onConfirm: () => {
         setConfirmacion(null);
         setWizardStep(2);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToWizardTop();
       },
     });
   };
@@ -140,7 +160,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       onConfirm: () => {
         setConfirmacion(null);
         setWizardStep(3);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToWizardTop();
       },
     });
   };
@@ -156,7 +176,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       onConfirm: () => {
         setConfirmacion(null);
         setWizardStep(5);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToWizardTop();
       },
     });
   };
@@ -196,7 +216,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
   const handleNext = () => {
     if (wizardStep < 5) {
       setWizardStep((prev) => prev + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollToWizardTop();
     } else {
       onComplete({
         surface,
@@ -214,7 +234,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
   const handlePrev = () => {
     if (wizardStep > 1) {
       setWizardStep((prev) => prev - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollToWizardTop();
     } else {
       onBackToLogin();
     }
@@ -247,14 +267,14 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
     <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
       {/* Segmento Profesional Elegido (Contexto de Sesión) */}
       {segmentoElegido && (
-        <div className="mb-6 p-4 rounded-xl bg-teal-50/80 border border-[#00A896]/30 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div className="mb-6 p-4 rounded-xl bg-[#F5EFE6] border border-[#E2622F]/30 flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#00A896] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-[#E2622F] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
               PRO
             </div>
             <div>
-              <p className="text-xs font-bold text-[#001D40]">
-                Canal profesional activo: <span className="text-[#00A896] font-extrabold">{segmentoElegido}</span>
+              <p className="text-xs font-bold text-[#1A1715]">
+                Canal profesional activo: <span className="text-[#E2622F] font-extrabold">{segmentoElegido}</span>
               </p>
               <p className="text-[11px] text-stone-600">
                 Tarifas preferenciales, cálculo por cuñetes de obra y asignación de cuadrillas certificadas.
@@ -265,7 +285,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
             <button
               type="button"
               onClick={onCambiarSegmento}
-              className="text-xs font-bold text-[#001D40] hover:text-[#00A896] underline cursor-pointer"
+              className="text-xs font-bold text-[#1A1715] hover:text-[#E2622F] underline cursor-pointer"
             >
               Cambiar segmento
             </button>
@@ -274,10 +294,10 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       )}
 
       {/* Top Banner */}
-      <div className="mb-6">
+      <div id="wizard-step-top" className="mb-6 scroll-mt-24">
         <div className="flex items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#00A896]">
+            <span className="text-xs font-semibold text-[#E2622F]">
               Paso {wizardStep} de 5 del diagnóstico
             </span>
             <span className="text-stone-300">·</span>
@@ -295,18 +315,55 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
           </div>
 
           {user && (
-            <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg font-medium">
+            <span className="text-xs text-stone-800 bg-[#D9A441]/15 border border-[#D9A441]/40 text-[#1A1715] px-2.5 py-1 rounded-lg font-medium">
               15% descuento VIP activo
             </span>
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1917]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#2B211C]">
           {wizardSubtitles[wizardStep].title}
         </h1>
         <p className="text-sm text-stone-500 mt-1">
           {wizardSubtitles[wizardStep].desc}
         </p>
+
+        {/* Consejo inteligente en vivo con el avatar de Sofía */}
+        <div className="mt-3.5 p-3 rounded-xl bg-gradient-to-r from-teal-50/90 via-teal-50/40 to-white border border-[#E8DFD5] flex items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#E2622F] shrink-0">
+              <img
+                src="/src/assets/images/asesor_avatar_1791011367910.jpg"
+                alt="Sofía Asesora Pintuco"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white" />
+            </div>
+            <div>
+              <span className="font-bold text-[#1A1715] block text-[11px]">
+                Tip de Sofía (Asesora Técnica Pintuco):
+              </span>
+              <span className="text-stone-600 block text-[11px] leading-snug">
+                {wizardStep === 1 && "Selecciona el material base. Cada superficie requiere resinas de adherencia específica."}
+                {wizardStep === 2 && "Identificar el reto técnico nos permite formular el sellador e imprimante necesario."}
+                {wizardStep === 3 && "Calculamos los galones considerando 2 manos y un 10% de desperdicio técnico para que no falte pintura."}
+                {wizardStep === 4 && "Puedes usar el simulador de arquitectura con recorte de paredes para probar tonos en vivo."}
+                {wizardStep === 5 && "Asignamos la sede oficial y el maestro con mejor calificación en tu ciudad."}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const btn = document.getElementById("btn-virtual-advisor");
+              if (btn) btn.click();
+            }}
+            className="text-[10px] font-bold text-[#E2622F] hover:text-[#1A1715] whitespace-nowrap bg-white px-2.5 py-1 rounded-md border border-[#E8DFD5] transition cursor-pointer shadow-2xs shrink-0"
+          >
+            Consultar a Sofía →
+          </button>
+        </div>
       </div>
 
       {/* STEP 1: Surface Selection */}
@@ -318,29 +375,29 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
               <div
                 key={item.id}
                 onClick={() => handleSelectSurface(item)}
-                className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
+                className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between group ${
                   isSelected
-                    ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                    : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                    ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F]"
+                    : "border-stone-200 hover:border-stone-300 bg-white"
                 }`}
                 id={`surface-${item.id}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
                         isSelected
-                          ? "bg-[#00A896] text-white"
-                          : "bg-stone-100 text-stone-700"
+                          ? "bg-[#1A1715] text-white"
+                          : "bg-stone-100 text-[#1A1715] group-hover:bg-stone-200"
                       }`}
                     >
                       {getSurfaceIcon(item.id)}
                     </div>
                     {isSelected && (
-                      <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
+                      <CheckCircle2 className="w-5 h-5 text-[#E2622F]" />
                     )}
                   </div>
-                  <h3 className="font-bold text-sm text-[#1C1917] mb-1">
+                  <h3 className="font-bold text-sm text-[#2B211C] mb-1 group-hover:text-[#1A1715]">
                     {item.title}
                   </h3>
                   <p className="text-xs text-stone-500 leading-relaxed">
@@ -348,11 +405,20 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400 font-medium">
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-medium">
                   <span>Área típica: {item.defaultM2} m²</span>
-                  <span className="text-[#00A896] font-semibold">
-                    {item.environment === "interior" ? "Interior" : item.environment === "exterior" ? "Exterior" : "Mixto"}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGallerySurface(item);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#1A1715] hover:text-[#E2622F] hover:bg-[#F5EFE6] px-2 py-1 rounded-md transition-colors border border-stone-200 hover:border-[#E2622F]/40 cursor-pointer"
+                    title={`Ver ejemplos reales de ${item.title}`}
+                  >
+                    <Images className="w-3.5 h-3.5 text-[#E2622F]" />
+                    <span>Ver ejemplos</span>
+                  </button>
                 </div>
               </div>
             );
@@ -364,25 +430,28 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       {wizardStep === 2 && (
         <div className="space-y-4">
           {/* Barra de contexto de superficie activa */}
-          <div className="bg-teal-50/70 border border-[#00A896]/30 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="bg-white border border-stone-200 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-[#001D40]">Superficie elegida:</span>
-              <span className="text-[#00A896] font-bold">
+              <span className="font-bold text-[#1A1715]">Superficie:</span>
+              <span className="text-[#E2622F] font-bold">
                 {SURFACE_OPTIONS.find((s) => s.id === surface)?.title}
               </span>
               <span className="text-stone-300">·</span>
-              <span className="text-stone-600 font-medium">
+              <span className="text-stone-500">
                 {SURFACE_OPTIONS.find((s) => s.id === surface)?.environment === "interior"
-                  ? "Retos técnicos exclusivos para interiores"
+                  ? "Retos para interiores"
                   : SURFACE_OPTIONS.find((s) => s.id === surface)?.environment === "exterior"
-                  ? "Retos técnicos exclusivos para exteriores e intemperie"
-                  : "Retos técnicos para madera y metales"}
+                  ? "Retos para exteriores e intemperie"
+                  : "Retos para madera y metales"}
               </span>
             </div>
             <button
               type="button"
-              onClick={() => setWizardStep(1)}
-              className="text-[#00A896] font-bold hover:underline cursor-pointer"
+              onClick={() => {
+                setWizardStep(1);
+                scrollToWizardTop();
+              }}
+              className="text-[#E2622F] font-semibold hover:underline cursor-pointer"
             >
               Cambiar superficie
             </button>
@@ -397,21 +466,21 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   onClick={() => handleSelectProblem(item)}
                   className={`cursor-pointer rounded-xl border p-5 transition flex flex-col justify-between ${
                     isSelected
-                      ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896] shadow-sm"
-                      : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                      ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F]"
+                      : "border-stone-200 hover:border-stone-300 bg-white"
                   }`}
                   id={`problem-${item.id}`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-[#00A896] capitalize">
+                      <span className="text-[11px] text-stone-500 font-medium capitalize">
                         Severidad: {item.severity}
                       </span>
                       {isSelected && (
-                        <CheckCircle2 className="w-5 h-5 text-[#00A896]" />
+                        <CheckCircle2 className="w-5 h-5 text-[#E2622F]" />
                       )}
                     </div>
-                    <h3 className="font-bold text-base text-[#1C1917] mb-1">
+                    <h3 className="font-bold text-base text-[#2B211C] mb-1">
                       {item.title}
                     </h3>
                     <p className="text-xs text-stone-500 leading-relaxed mb-3">
@@ -419,8 +488,8 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                     </p>
                   </div>
 
-                  <div className="bg-stone-50 rounded-lg p-2.5 text-xs text-stone-600 border border-stone-100">
-                    <span className="font-medium text-stone-800">Tratamiento técnico:</span>{" "}
+                  <div className="bg-stone-50/80 rounded-lg p-2.5 text-xs text-stone-600 border border-stone-100">
+                    <span className="font-semibold text-stone-800">Tratamiento técnico:</span>{" "}
                     {item.tag}
                   </div>
                 </div>
@@ -433,10 +502,10 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       {/* STEP 3: Area Calculator */}
       {wizardStep === 3 && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-[#E7E5E4] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white rounded-xl border border-[#E8DFD5] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-[#1C1917]">
+                <label className="block text-sm font-semibold text-[#2B211C]">
                   Área estimada de la superficie a pintar
                 </label>
                 <p className="text-xs text-stone-500">
@@ -451,7 +520,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   max="500"
                   value={areaM2}
                   onChange={(e) => setAreaM2(Math.max(5, Number(e.target.value) || 5))}
-                  className="w-24 text-right text-lg font-bold border border-[#E7E5E4] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                  className="w-24 text-right text-lg font-bold border border-[#E8DFD5] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 />
                 <span className="text-sm font-semibold text-stone-600">m²</span>
               </div>
@@ -465,7 +534,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
               step="1"
               value={areaM2}
               onChange={(e) => setAreaM2(Number(e.target.value))}
-              className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-[#00A896] mb-6"
+              className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-[#E2622F] mb-6"
             />
 
             {/* Presets */}
@@ -486,8 +555,8 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                     onClick={() => setAreaM2(preset.val)}
                     className={`text-xs px-3 py-2 rounded-lg border font-medium transition cursor-pointer text-center ${
                       areaM2 === preset.val
-                        ? "bg-[#001D40] text-white border-[#001D40]"
-                        : "bg-white text-stone-700 border-[#E7E5E4] hover:bg-stone-50"
+                        ? "bg-[#1A1715] text-white border-[#1A1715]"
+                        : "bg-white text-stone-700 border-[#E8DFD5] hover:bg-stone-50"
                     }`}
                   >
                     {preset.label} ({preset.val} m²)
@@ -504,7 +573,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAdvancedCalc(!showAdvancedCalc)}
-                className="text-xs font-semibold text-[#00A896] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-[#E2622F] hover:underline cursor-pointer"
               >
                 {showAdvancedCalc ? "Ocultar desglose" : "Desglosar por medidas"}
               </button>
@@ -512,7 +581,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
 
             {showAdvancedCalc && (
               <div className="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
-                <span className="text-xs font-bold text-[#1C1917] block">
+                <span className="text-xs font-bold text-[#2B211C] block">
                   Cálculo detallado de paredes
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -563,7 +632,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   <button
                     type="button"
                     onClick={handleApplyAdvancedCalc}
-                    className="bg-[#001D40] text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-stone-800 transition cursor-pointer"
+                    className="bg-[#1A1715] text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-stone-800 transition cursor-pointer"
                   >
                     Aplicar {Math.max(5, Math.round(wallWidth * wallHeight * wallCount - doorsWindowsM2))} m²
                   </button>
@@ -578,25 +647,25 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
             const estGallons = (areaM2 / coverageM2PerGal).toFixed(1);
             return (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                <div className="bg-white p-4 rounded-xl border border-[#E8DFD5] shadow-sm">
                   <span className="text-xs text-stone-500 font-medium block">Galones estimados (2 manos)</span>
-                  <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
+                  <span className="text-lg font-bold text-[#2B211C] mt-0.5 block">
                     ~{estGallons} galones
                   </span>
                   <span className="text-[11px] text-stone-400 block mt-0.5">
                     Rendimiento: {coverageM2PerGal} m²/galón
                   </span>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                <div className="bg-white p-4 rounded-xl border border-[#E8DFD5] shadow-sm">
                   <span className="text-xs text-stone-500 font-medium block">Presentación óptima</span>
-                  <span className="text-lg font-bold text-[#1C1917] mt-0.5 block">
+                  <span className="text-lg font-bold text-[#2B211C] mt-0.5 block">
                     {Number(estGallons) >= 4 ? "Cuñetes de 5 galones" : "Galones individuales"}
                   </span>
                   <span className="text-[11px] text-stone-400 block mt-0.5">
                     {Number(estGallons) >= 4 ? `~${Math.floor(Number(estGallons) / 5)} cuñete(s)` : "Presentación galón"}
                   </span>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-[#E7E5E4] shadow-sm">
+                <div className="bg-white p-4 rounded-xl border border-[#E8DFD5] shadow-sm">
                   <span className="text-xs text-stone-500 font-medium block">Recomendación técnica</span>
                   <span className="text-lg font-bold text-emerald-700 mt-0.5 block">
                     2 manos cruzadas
@@ -639,10 +708,10 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
           />
 
           {/* Official Pintuco Swatches Palette */}
-          <div className="bg-white rounded-xl border border-[#E7E5E4] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="bg-white rounded-xl border border-[#E8DFD5] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-[#1C1917]">
+                <h3 className="text-sm font-bold text-[#2B211C]">
                   Carta de colores oficiales Pintuco
                 </h3>
                 <p className="text-xs text-stone-500">
@@ -664,8 +733,8 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                     onClick={() => handleSelectColor(color)}
                     className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
                       isSelected
-                        ? "border-[#00A896] bg-[#00A896]/5 ring-1 ring-[#00A896]"
-                        : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                        ? "border-[#E2622F] bg-[#E2622F]/5 ring-1 ring-[#E2622F]"
+                        : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                     }`}
                   >
                     <div
@@ -673,7 +742,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                       style={{ backgroundColor: color.hex }}
                     />
                     <div>
-                      <p className="text-xs font-bold text-[#1C1917] truncate">
+                      <p className="text-xs font-bold text-[#2B211C] truncate">
                         {color.name}
                       </p>
                       <p className="text-[10px] text-stone-400">
@@ -691,8 +760,8 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       {/* STEP 5: Location, Urgency & Project Notes */}
       {wizardStep === 5 && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-[#E7E5E4] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
-            <h3 className="text-sm font-bold text-[#1C1917]">
+          <div className="bg-white rounded-xl border border-[#E8DFD5] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
+            <h3 className="text-sm font-bold text-[#2B211C]">
               Lugar y plazo del proyecto
             </h3>
 
@@ -706,7 +775,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-[#E7E5E4] focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                    className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-[#E8DFD5] focus:outline-none focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
                   >
                     {COLOMBIAN_CITIES.map((c) => (
                       <option key={c} value={c}>
@@ -726,7 +795,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="Ej: Calle 134 # 19-45, Cedritos"
-                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-[#E7E5E4] focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-[#E8DFD5] focus:outline-none focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
                 />
               </div>
             </div>
@@ -747,8 +816,8 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                     onClick={() => setUrgency(item.id as any)}
                     className={`p-3 rounded-lg border text-left transition cursor-pointer ${
                       urgency === item.id
-                        ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
-                        : "border-[#E7E5E4] hover:border-stone-300 bg-white"
+                        ? "border-[#E2622F] bg-[#E2622F]/5 text-[#1A1715] font-semibold"
+                        : "border-[#E8DFD5] hover:border-stone-300 bg-white"
                     }`}
                   >
                     <span className="text-xs font-bold block">{item.label}</span>
@@ -767,7 +836,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                 value={projectNotes}
                 onChange={(e) => setProjectNotes(e.target.value)}
                 placeholder="Ej: Hay manchas oscuras de humedad en la esquina superior; techo alto de 3 metros..."
-                className="w-full p-3 text-xs rounded-lg border border-[#E7E5E4] focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                className="w-full p-3 text-xs rounded-lg border border-[#E8DFD5] focus:outline-none focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
               />
             </div>
           </div>
@@ -775,11 +844,11 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
       )}
 
       {/* Navigation Footer */}
-      <div className="mt-8 pt-6 border-t border-[#E7E5E4] flex items-center justify-between gap-4">
+      <div className="mt-8 pt-6 border-t border-[#E8DFD5] flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={handlePrev}
-          className="border border-stone-300 hover:bg-stone-50 text-[#001D40] font-medium px-5 py-2.5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer text-sm"
+          className="border border-stone-300 hover:bg-stone-50 text-[#1A1715] font-medium px-5 py-2.5 rounded-lg transition inline-flex items-center gap-2 cursor-pointer text-sm"
           id="btn-wizard-prev"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -789,7 +858,7 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
         <button
           type="button"
           onClick={handleNext}
-          className="bg-[#00A896] hover:bg-[#009282] text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition inline-flex items-center gap-2 cursor-pointer text-sm"
+          className="bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition inline-flex items-center gap-2 cursor-pointer text-sm active:scale-[0.98]"
           id="btn-wizard-next"
         >
           <span>{wizardStep === 5 ? "Formular solución técnica" : "Continuar"}</span>
@@ -827,24 +896,24 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
                   style={{ backgroundColor: confirmacion.colorHex }}
                 />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-teal-50 text-[#00A896] border border-teal-100 flex items-center justify-center shrink-0">
-                  {confirmacion.icono || <CheckCircle2 className="w-6 h-6 text-[#00A896]" />}
+                <div className="w-11 h-11 rounded-xl bg-stone-100 text-[#1A1715] flex items-center justify-center shrink-0">
+                  {confirmacion.icono || <CheckCircle2 className="w-5 h-5 text-[#E2622F]" />}
                 </div>
               )}
               <div className="pr-6">
                 {confirmacion.badge && (
-                  <span className="inline-block text-[11px] font-bold text-[#00A896] bg-teal-50 px-2 py-0.5 rounded-md mb-1">
+                  <span className="text-[11px] font-semibold text-[#E2622F] block mb-0.5 uppercase tracking-wider">
                     {confirmacion.badge}
                   </span>
                 )}
-                <h3 className="font-bold text-base text-[#1C1917] leading-tight">
+                <h3 className="font-bold text-base text-[#2B211C] leading-tight">
                   {confirmacion.titulo}
                 </h3>
               </div>
             </div>
 
             {/* Resumen conciso de 1-2 líneas */}
-            <p className="text-xs text-stone-600 leading-relaxed mb-6 bg-stone-50 p-3.5 rounded-xl border border-stone-100">
+            <p className="text-xs text-stone-600 leading-relaxed mb-6 bg-stone-50/80 p-3.5 rounded-xl border border-stone-100">
               {confirmacion.resumen}
             </p>
 
@@ -853,14 +922,14 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
               <button
                 type="button"
                 onClick={() => setConfirmacion(null)}
-                className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-100 rounded-lg transition cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-stone-500 hover:text-stone-800 transition cursor-pointer"
               >
                 Cambiar opción
               </button>
               <button
                 type="button"
                 onClick={confirmacion.onConfirm}
-                className="bg-[#00A896] hover:bg-[#009282] text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="bg-gradient-to-br from-[#E2622F] to-[#F2A93C] hover:opacity-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition inline-flex items-center gap-1.5 cursor-pointer shadow-md active:scale-[0.98]"
               >
                 <span>Confirmar y continuar</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -869,6 +938,17 @@ export const NeedWizard: React.FC<NeedWizardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal de Galería de Ejemplos Reales con Pexels y Caché */}
+      <SurfaceGalleryModal
+        surface={gallerySurface}
+        isOpen={!!gallerySurface}
+        onClose={() => setGallerySurface(null)}
+        onSelectSurface={(surf) => {
+          setGallerySurface(null);
+          handleSelectSurface(surf);
+        }}
+      />
     </div>
   );
 };

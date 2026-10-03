@@ -138,8 +138,8 @@ export const SupabaseTestPanel: React.FC<Props> = ({ projectNeed, recommendation
   return (
     <section className="max-w-4xl mx-auto px-4 py-10">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="bg-[#001D40] text-white px-6 py-5 flex items-center gap-3">
-          <Database className="w-6 h-6 text-[#00A896]" />
+        <div className="bg-[#1A1715] text-white px-6 py-5 flex items-center gap-3">
+          <Database className="w-6 h-6 text-[#E2622F]" />
           <div>
             <h2 className="text-lg font-bold">Pruebas de integración Supabase</h2>
             <p className="text-blue-200 text-xs">
@@ -159,7 +159,7 @@ export const SupabaseTestPanel: React.FC<Props> = ({ projectNeed, recommendation
           <button
             onClick={ejecutarPruebas}
             disabled={corriendo}
-            className="inline-flex items-center gap-2 bg-[#00A896] hover:bg-[#008577] disabled:opacity-50 text-white font-semibold px-5 py-3 rounded-xl transition"
+            className="inline-flex items-center gap-2 bg-[#E2622F] hover:bg-[#C95222] disabled:opacity-50 text-white font-semibold px-5 py-3 rounded-xl transition"
           >
             <Play className="w-4 h-4" />
             {corriendo ? "Ejecutando pruebas..." : "Ejecutar pruebas de integración"}

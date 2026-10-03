@@ -136,12 +136,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </button>
 
         {/* Encabezado */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#00A896] mb-2">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#E2622F] mb-2">
           <ShieldCheck className="w-4 h-4" />
           <span>Acceso oficial ColorLink by Pintuco</span>
         </div>
 
-        <h2 className="text-xl sm:text-2xl font-bold text-[#1C1917]">
+        <h2 className="text-xl sm:text-2xl font-bold text-[#2B211C]">
           {isRegister ? "Crear cuenta de cliente" : "Iniciar sesión en mi cuenta"}
         </h2>
         <p className="text-xs text-stone-500 mt-1 mb-6">
@@ -157,7 +157,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             onClick={() => setIsRegister(false)}
             className={`pb-2.5 font-semibold text-xs transition-colors border-b-2 mr-6 cursor-pointer ${
               !isRegister
-                ? "border-[#001D40] text-[#001D40]"
+                ? "border-[#1A1715] text-[#1A1715]"
                 : "border-transparent text-stone-400 hover:text-stone-700"
             }`}
           >
@@ -168,7 +168,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             onClick={() => setIsRegister(true)}
             className={`pb-2.5 font-semibold text-xs transition-colors border-b-2 cursor-pointer ${
               isRegister
-                ? "border-[#001D40] text-[#001D40]"
+                ? "border-[#1A1715] text-[#1A1715]"
                 : "border-transparent text-stone-400 hover:text-stone-700"
             }`}
           >
@@ -187,11 +187,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onClick={() => setCustomerType("hogar")}
               className={`p-2.5 rounded-lg border text-xs font-medium transition cursor-pointer flex flex-col items-center gap-1 ${
                 customerType === "hogar"
-                  ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
+                  ? "border-[#E2622F] bg-[#E2622F]/5 text-[#1A1715] font-semibold"
                   : "border-stone-200 text-stone-600 hover:border-stone-300 bg-white"
               }`}
             >
-              <Home className="w-4 h-4 text-[#00A896]" />
+              <Home className="w-4 h-4 text-[#E2622F]" />
               <span>Hogar</span>
             </button>
             <button
@@ -199,11 +199,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onClick={() => setCustomerType("contratista")}
               className={`p-2.5 rounded-lg border text-xs font-medium transition cursor-pointer flex flex-col items-center gap-1 ${
                 customerType === "contratista"
-                  ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
+                  ? "border-[#E2622F] bg-[#E2622F]/5 text-[#1A1715] font-semibold"
                   : "border-stone-200 text-stone-600 hover:border-stone-300 bg-white"
               }`}
             >
-              <Briefcase className="w-4 h-4 text-[#00A896]" />
+              <Briefcase className="w-4 h-4 text-[#E2622F]" />
               <span>Contratista</span>
             </button>
             <button
@@ -211,11 +211,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onClick={() => setCustomerType("empresa")}
               className={`p-2.5 rounded-lg border text-xs font-medium transition cursor-pointer flex flex-col items-center gap-1 ${
                 customerType === "empresa"
-                  ? "border-[#00A896] bg-[#00A896]/5 text-[#001D40] font-semibold"
+                  ? "border-[#E2622F] bg-[#E2622F]/5 text-[#1A1715] font-semibold"
                   : "border-stone-200 text-stone-600 hover:border-stone-300 bg-white"
               }`}
             >
-              <Building2 className="w-4 h-4 text-[#00A896]" />
+              <Building2 className="w-4 h-4 text-[#E2622F]" />
               <span>Empresa</span>
             </button>
           </div>
@@ -263,7 +263,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 placeholder="Ej: Carolina Gómez"
               />
             </div>
@@ -279,7 +279,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 placeholder="Ej: Morales Obras S.A.S."
               />
             </div>
@@ -296,7 +296,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                className="w-full pl-9 pr-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 placeholder="tu.correo@ejemplo.com"
               />
             </div>
@@ -313,7 +313,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                className="w-full pl-9 pr-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                 placeholder="••••••••"
               />
             </div>
@@ -328,7 +328,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] bg-white text-[#1C1917]"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] bg-white text-[#2B211C]"
                 >
                   {COLOMBIAN_CITIES.map((c) => (
                     <option key={c} value={c}>
@@ -345,7 +345,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#00A896] text-[#1C1917]"
+                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#E2622F] text-[#2B211C]"
                   placeholder="+57 312..."
                 />
               </div>
@@ -355,7 +355,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full bg-[#00A896] hover:bg-[#009282] text-white font-semibold py-2.5 rounded-lg transition shadow-sm cursor-pointer text-sm"
+              className="w-full bg-[#E2622F] hover:bg-[#C95222] text-white font-semibold py-2.5 rounded-lg transition shadow-sm cursor-pointer text-sm"
             >
               {isRegister ? "Crear cuenta y continuar" : "Iniciar sesión"}
             </button>
